@@ -14,13 +14,22 @@
 # limitations under the License.
 #
 
+menu "CHARGERD CONFIG"
+
 config CHARGERD
 	bool "chargerd"
+	depends on BATTERY_CHARGER && BATTERY_GAUGE
 	default n
 	---help---
 		This application is used to manager charge logic
 
 if CHARGERD
+
+config CHARGERD_HWINTF_CONVERSION
+	bool "hwintf conversion"
+	default n
+	---help---
+		This application is used to battery data conversion
 
 config CHARGERD_PROGNAME
 	string "Program name"
@@ -38,3 +47,5 @@ config CHARGERD_STACKSIZE
 	default DEFAULT_TASK_STACKSIZE
 
 endif
+
+endmenu # CHARGERD CONFIG

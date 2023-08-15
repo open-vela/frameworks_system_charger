@@ -16,13 +16,13 @@
 
 include $(APPDIR)/Make.defs
 
+CFLAGS += ${INCDIR_PREFIX} $(APPDIR)/frameworks/charger/include
+
 PROGNAME = $(CONFIG_CHARGERD_PROGNAME)
 PRIORITY = $(CONFIG_CHARGERD_PRIORITY)
 STACKSIZE = $(CONFIG_CHARGERD_STACKSIZE)
 
-MAINSRC = charge_manager.c
-CSRCS += charge_zone_user.c
-
-CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(APPDIR)/external/uORB}
+MAINSRC = charger_manager.c
+CSRCS += charger_statemachine.c charger_hwintf.c charger_algo.c charger_desc.c
 
 include $(APPDIR)/Application.mk
