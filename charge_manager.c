@@ -210,7 +210,7 @@ static int charge_mode_init_cb(charge_service_t* cs)
         }
     }
 
-    cs->temperature_uorb_fd = orb_subscribe(ORB_ID(board_temperature));
+    cs->temperature_uorb_fd = orb_subscribe(ORB_ID(device_temperature));
     if (cs->temperature_uorb_fd < 0) {
         chargeerr("Uorb subscribec failed: %d\n", cs->temperature_uorb_fd);
         return -1;
