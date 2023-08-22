@@ -206,7 +206,7 @@ static int get_cur_charge_temperature(charge_zone_t* zone)
     int ret;
     int temperature_protect_old = 0;
     bool temp_updated = false;
-    struct board_temperature board_temp;
+    struct device_temperature device_temp;
     charge_service_t* data = (charge_service_t*)zone->ops_data;
 
     //get charge_temperature;
@@ -221,12 +221,12 @@ static int get_cur_charge_temperature(charge_zone_t* zone)
     }
 
     if (temp_updated) {
-        ret = orb_copy(ORB_ID(board_temperature), data->temperature_uorb_fd, &board_temp);
+        ret = orb_copy(ORB_ID(device_temperature), data->temperature_uorb_fd, &device_temp);
         if (ret != OK) {
             chargeerr("temp orb copy failed\n");
             return -1;
         }
-        zone->charge_temperature.shell_temp = board_temp.skin * TEMP_VALUE_GAIN;
+        zone->charge_temperature.shell_temp = device_temp.skin * TEMP_VALUE_GAIN;
     }
 
     chargedebug("zone->temperature_protect=%d\n", zone->temperature_protect);
