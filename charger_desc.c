@@ -34,6 +34,9 @@
 #define ADAPTER_EN_DELAY 3000
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
+#define MAX_NUM_CHARS 100
+#define MAX_NUM_PLOT_PARAMS 30
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -179,8 +182,261 @@ fail:
 
 static int charger_desc_by_config(struct charger_desc* desc, const char* config)
 {
-    /*TODO: return failed*/
+    struct charger_plot_parameter tmp_charge_plot_table[MAX_NUM_PLOT_PARAMS];
+    char buf[MAX_NUM_CHARS];
+    int plot_table_size = 0;
 
+    FILE* f = fopen(CONFIG_CHARGER_CONFIGURATION_FILE_PATH, "r");
+    if (!f) {
+        chargererr("fopen failed\n");
+        return CHARGER_FAILED;
+    }
+
+    desc->plots = -1;
+
+    while (fgets(buf, MAX_NUM_CHARS, f)) {
+        int ret = -1;
+
+        int buf_len = strlen(buf);
+        if (buf[buf_len - 1] == '\n')
+            buf[buf_len - 1] = '\0';
+
+        ret = strncmp(buf, "charger_supply=", sizeof("charger_supply=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("charger_supply=") - 1];
+            strncpy(desc->charger_supply, tmp, MAX_BUF_LEN);
+            continue;
+        }
+        ret = strncmp(buf, "charger_adapter=", sizeof("charger_adapter=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("charger_adapter=") - 1];
+            strncpy(desc->charger_adapter, tmp, MAX_BUF_LEN);
+            continue;
+        }
+        ret = strncmp(buf, "charger=", sizeof("charger=") - 1);
+        if (ret == 0) {
+            char* segmentation;
+            char* tmp = &buf[sizeof("charger=") - 1];
+
+            if ((segmentation = strstr(tmp, ";")) == NULL) {
+                strncpy(desc->charger[0], tmp, MAX_BUF_LEN);
+            } else {
+                char* sub_str;
+                int index = -1;
+                sub_str = strtok(tmp, ";");
+                while (sub_str != NULL) {
+                    index++;
+                    strncpy(desc->charger[index], sub_str, MAX_BUF_LEN);
+                    sub_str = strtok(NULL, ";");
+                }
+            }
+            continue;
+        }
+        ret = strncmp(buf, "fuel_gauge=", sizeof("fuel_gauge=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("fuel_gauge=") - 1];
+            strncpy(desc->fuel_gauge, tmp, MAX_BUF_LEN);
+            continue;
+        }
+        ret = strncmp(buf, "algo=", sizeof("algo=") - 1);
+        if (ret == 0) {
+            char* segmentation;
+            char* tmp = &buf[sizeof("algo=") - 1];
+            if ((segmentation = strstr(tmp, ";")) == NULL) {
+                strncpy(desc->algo[0], tmp, MAX_BUF_LEN);
+            } else {
+                char* sub_str;
+                int index = -1;
+
+                sub_str = strtok(tmp, ";");
+                while (sub_str != NULL) {
+                    index++;
+                    strncpy(desc->algo[index], sub_str, MAX_BUF_LEN);
+                    sub_str = strtok(NULL, ";");
+                }
+            }
+            continue;
+        }
+
+        ret = strncmp(buf, "chargers=", sizeof("chargers=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("chargers=") - 1];
+            desc->chargers = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "polling_interval_ms=", sizeof("polling_interval_ms=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("polling_interval_ms=") - 1];
+            desc->polling_interval_ms = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "fullbatt_capacity=", sizeof("fullbatt_capacity=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("fullbatt_capacity=") - 1];
+            desc->fullbatt_capacity = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "fullbatt_current=", sizeof("fullbatt_current=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("fullbatt_current=") - 1];
+            desc->fullbatt_current = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "fullbatt_duration_ms=", sizeof("fullbatt_duration_ms=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("fullbatt_duration_ms=") - 1];
+            desc->fullbatt_duration_ms = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "fault_duration_ms=", sizeof("fault_duration_ms=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("fault_duration_ms=") - 1];
+            desc->fault_duration_ms = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_min=", sizeof("temp_min=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_min=") - 1];
+            desc->temp_min = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_min_r=", sizeof("temp_min_r=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_min_r=") - 1];
+            desc->temp_min_r = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_max=", sizeof("temp_max=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_max=") - 1];
+            desc->temp_max = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_max_r=", sizeof("temp_max_r=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_max_r=") - 1];
+            desc->temp_max_r = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_skin=", sizeof("temp_skin=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_skin=") - 1];
+            desc->temp_skin = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "temp_skin_r=", sizeof("temp_skin_r=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("temp_skin_r=") - 1];
+            desc->temp_skin_r = atoi(tmp);
+            continue;
+        }
+        ret = strncmp(buf, "enable_delay_ms=", sizeof("enable_delay_ms=") - 1);
+        if (ret == 0) {
+            char* tmp = &buf[sizeof("enable_delay_ms=") - 1];
+            desc->enable_delay_ms = atoi(tmp);
+            continue;
+        }
+
+        ret = strncmp(buf, "charger_fault_plot_table=", sizeof("charger_fault_plot_table=") - 1);
+        if (ret == 0) {
+            struct charger_plot_parameter tmp_param;
+            int tmp_array[7];
+            int tmp_index = 0;
+            char* sub_str;
+            char* tmp = &buf[sizeof("charger_fault_plot_table=") - 1];
+
+            sub_str = strtok(tmp, ",");
+            while (sub_str) {
+                tmp_array[tmp_index] = atoi(sub_str);
+                tmp_index++;
+                sub_str = strtok(NULL, ",");
+                if (tmp_index == 7) {
+                    tmp_param.temp_range_min = tmp_array[0];
+                    tmp_param.temp_range_max = tmp_array[1];
+                    tmp_param.vol_range_min = tmp_array[2];
+                    tmp_param.vol_range_max = tmp_array[3];
+                    tmp_param.charger_index = tmp_array[4];
+                    tmp_param.work_current = tmp_array[5];
+                    tmp_param.supply_vol = tmp_array[6];
+                    desc->fault = tmp_param;
+                }
+            }
+            continue;
+        }
+
+        ret = strncmp(buf, "charger_plot_table", sizeof("charger_plot_table") - 1);
+        if (ret == 0) {
+            int mask = 0;
+            char* tmp = &buf[sizeof("charge_plot_table") - 1];
+
+            desc->plots++;
+            while ((tmp = strstr(tmp, "_")) != NULL) {
+                mask = mask | (1 << atoi(tmp + 1));
+                tmp = tmp + 2;
+            }
+            desc->plot[desc->plots].mask = mask;
+            continue;
+        }
+
+        ret = strncmp(buf, "{", sizeof("{") - 1);
+        if (ret == 0) {
+            if (strlen(buf) == 1)
+                continue;
+            else {
+                struct charger_plot_parameter tmp_param;
+                int tmp_array[7];
+                int tmp_index = 0;
+                char* sub_str;
+                char* tmp = &buf[sizeof("{") - 1];
+
+                sub_str = strtok(tmp, ",");
+                while (sub_str) {
+                    tmp_array[tmp_index] = atoi(sub_str);
+                    tmp_index++;
+                    sub_str = strtok(NULL, ",");
+                    if (tmp_index == 7) {
+                        tmp_param.temp_range_min = tmp_array[0];
+                        tmp_param.temp_range_max = tmp_array[1];
+                        tmp_param.vol_range_min = tmp_array[2];
+                        tmp_param.vol_range_max = tmp_array[3];
+                        tmp_param.charger_index = tmp_array[4];
+                        tmp_param.work_current = tmp_array[5];
+                        tmp_param.supply_vol = tmp_array[6];
+                        tmp_charge_plot_table[plot_table_size] = tmp_param;
+                        plot_table_size++;
+                    }
+                }
+            }
+        }
+
+        ret = strncmp(buf, "};", sizeof("};") - 1);
+        if (ret == 0) {
+            struct charger_plot_parameter* tlbs = (struct charger_plot_parameter*)malloc(plot_table_size * sizeof(struct charger_plot_parameter));
+            if (NULL == tlbs) {
+                chargererr("alloc plot tables no memory\n");
+                goto fail;
+            }
+
+            memcpy(tlbs, tmp_charge_plot_table, plot_table_size * sizeof(struct charger_plot_parameter));
+            desc->plot[desc->plots].tlbs = tlbs;
+            desc->plot[desc->plots].parameters = plot_table_size;
+            plot_table_size = 0;
+            memset(tmp_charge_plot_table, 0, sizeof(tmp_charge_plot_table));
+            continue;
+        }
+    }
+
+    fclose(f);
+    return CHARGER_OK;
+
+fail:
+    for (int i = 0; i <= desc->plots; i++) {
+        if (desc->plot[i].tlbs != NULL) {
+            free(desc->plot[i].tlbs);
+            desc->plot[i].tlbs = NULL;
+        }
+    }
+    fclose(f);
     return CHARGER_FAILED;
 }
 

@@ -31,6 +31,10 @@ config CHARGERD_HWINTF_CONVERSION
 	---help---
 		This application is used to battery data conversion
 
+config CHARGER_CONFIGURATION_FILE_PATH
+	string "File path of charging related configuration parameters"
+	default "/etc/charger_parameters.txt"
+
 config CHARGERD_PROGNAME
 	string "Program name"
 	default "chargerd"
