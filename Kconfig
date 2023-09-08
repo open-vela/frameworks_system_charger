@@ -43,6 +43,12 @@ config CHARGERD_PROGNAME
 		This is the name of the program that will be use when the NSH ELF
 		program is installed.
 
+config CHARGERD_TOOL
+	bool "chargerd test tool"
+	default n
+	---help---
+		This application is used to test chargerd
+
 config CHARGERD_PRIORITY
 	int "chargerd task priority"
 	default 100

@@ -26,4 +26,9 @@ STACKSIZE = $(CONFIG_CHARGERD_STACKSIZE)
 MAINSRC = charger_manager.c
 CSRCS += charger_statemachine.c charger_hwintf.c charger_algo.c charger_desc.c
 
+ifneq ($(CONFIG_CHARGERD_TOOL),)
+  MAINSRC   += chargerd_tool.c
+  PROGNAME  += chargerdtool
+endif
+
 include $(APPDIR)/Application.mk
