@@ -440,6 +440,245 @@ fail:
     return CHARGER_FAILED;
 }
 
+static int charger_desc_by_json_config(struct charger_desc* desc, const char* parser)
+{
+    long length;
+    char* data;
+    cJSON *root, *tmp_pointer, *charging_fault_arry, *charger_list;
+
+    FILE* file = fopen(CONFIG_CHARGER_CONFIGURATION_FILE_PATH, "r");
+    if (!file) {
+        chargererr("Failed to open file %s\n", CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
+        return CHARGER_FAILED;
+    }
+
+    fseek(file, 0, SEEK_END);
+    length = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    data = (char*)malloc(length + 1);
+    if (data == NULL) {
+        chargererr("alloc data no memory\n");
+        fclose(file);
+        return CHARGER_FAILED;
+    }
+    fread(data, 1, length, file);
+    fclose(file);
+    data[length] = '\0';
+
+    root = cJSON_Parse(data);
+    if (!root) {
+        chargererr("Failed to parse JSON file of chargerd\n");
+        free(data);
+        return CHARGER_FAILED;
+    }
+
+    tmp_pointer = cJSON_GetObjectItem(root, "charger_supply");
+    if (tmp_pointer) {
+        strncpy(desc->charger_supply, tmp_pointer->valuestring, MAX_BUF_LEN);
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "charger_adapter");
+    if (tmp_pointer) {
+        strncpy(desc->charger_adapter, tmp_pointer->valuestring, MAX_BUF_LEN);
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "charger");
+    if (tmp_pointer) {
+        if ((strstr(tmp_pointer->valuestring, ";")) == NULL) {
+            strncpy(desc->charger[0], tmp_pointer->valuestring, MAX_BUF_LEN);
+        } else {
+            char* sub_str;
+            char* saveptr = NULL;
+            int index = -1;
+
+            sub_str = strtok_r(tmp_pointer->valuestring, ";", &saveptr);
+            while (sub_str != NULL) {
+                index++;
+                strncpy(desc->charger[index], sub_str, MAX_BUF_LEN);
+                sub_str = strtok_r(NULL, ";", &saveptr);
+            }
+        }
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "fuel_gauge");
+    if (tmp_pointer) {
+        strncpy(desc->fuel_gauge, tmp_pointer->valuestring, MAX_BUF_LEN);
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "algo");
+    if (tmp_pointer) {
+        if ((strstr(tmp_pointer->valuestring, ";")) == NULL) {
+            strncpy(desc->algo[0], tmp_pointer->valuestring, MAX_BUF_LEN);
+        } else {
+            char* sub_str;
+            char* saveptr = NULL;
+            int index = -1;
+
+            sub_str = strtok_r(tmp_pointer->valuestring, ";", &saveptr);
+            while (sub_str != NULL) {
+                index++;
+                strncpy(desc->algo[index], sub_str, MAX_BUF_LEN);
+                sub_str = strtok_r(NULL, ";", &saveptr);
+            }
+        }
+    }
+
+    tmp_pointer = cJSON_GetObjectItem(root, "chargers");
+    if (tmp_pointer) {
+        desc->chargers = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "polling_interval_ms");
+    if (tmp_pointer) {
+        desc->polling_interval_ms = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "fullbatt_capacity");
+    if (tmp_pointer) {
+        desc->fullbatt_capacity = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "fullbatt_current");
+    if (tmp_pointer) {
+        desc->fullbatt_current = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "fullbatt_duration_ms");
+    if (tmp_pointer) {
+        desc->fullbatt_duration_ms = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "fault_duration_ms");
+    if (tmp_pointer) {
+        desc->fault_duration_ms = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_min");
+    if (tmp_pointer) {
+        desc->temp_min = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_min_r");
+    if (tmp_pointer) {
+        desc->temp_min_r = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_max");
+    if (tmp_pointer) {
+        desc->temp_max = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_max_r");
+    if (tmp_pointer) {
+        desc->temp_max_r = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin");
+    if (tmp_pointer) {
+        desc->temp_skin = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_r");
+    if (tmp_pointer) {
+        desc->temp_skin_r = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "enable_delay_ms");
+    if (tmp_pointer) {
+        desc->enable_delay_ms = tmp_pointer->valueint;
+    }
+
+    charging_fault_arry = cJSON_GetObjectItem(root, "charger_fault_plot_table");
+    if (charging_fault_arry != NULL) {
+        cJSON* parameter = charging_fault_arry->child;
+        if (parameter != NULL) {
+            cJSON *temp_range_min_p, *temp_range_max_p, *vol_range_min_p, *vol_range_max_p, *charger_index_p, *work_current_p, *supply_vol_p;
+            temp_range_min_p = cJSON_GetObjectItem(parameter, "temp_range_min");
+            temp_range_max_p = cJSON_GetObjectItem(parameter, "temp_range_max");
+            vol_range_min_p = cJSON_GetObjectItem(parameter, "vol_range_min");
+            vol_range_max_p = cJSON_GetObjectItem(parameter, "vol_range_max");
+            charger_index_p = cJSON_GetObjectItem(parameter, "charger_index");
+            work_current_p = cJSON_GetObjectItem(parameter, "work_current");
+            supply_vol_p = cJSON_GetObjectItem(parameter, "supply_vol");
+            if (temp_range_min_p && temp_range_max_p && vol_range_min_p && vol_range_max_p && charger_index_p && work_current_p && supply_vol_p) {
+                desc->fault.temp_range_min = temp_range_min_p->valueint;
+                desc->fault.temp_range_max = temp_range_max_p->valueint;
+                desc->fault.vol_range_min = vol_range_min_p->valueint;
+                desc->fault.vol_range_max = vol_range_max_p->valueint;
+                desc->fault.charger_index = charger_index_p->valueint;
+                desc->fault.work_current = work_current_p->valueint;
+                desc->fault.supply_vol = supply_vol_p->valueint;
+            } else {
+                chargererr("an element of the charging plot table is incomplete\n");
+            }
+        }
+    }
+
+    charger_list = cJSON_GetObjectItem(root, "charger_plot_table_list");
+    if (charger_list != NULL) {
+        cJSON* charger_plot_table_index;
+
+        desc->plots = -1;
+        charger_plot_table_index = charger_list->child;
+        while (charger_plot_table_index != NULL) {
+            cJSON* name_p = cJSON_GetObjectItem(charger_plot_table_index, "name");
+
+            desc->plots++;
+            if (name_p != NULL) {
+                int element_num;
+                struct charger_plot_parameter* tlbs;
+                cJSON* charging_arry;
+                const char* name = name_p->valuestring;
+
+                element_num = cJSON_GetObjectItem(charger_plot_table_index, "element_num")->valueint;
+                tlbs = (struct charger_plot_parameter*)malloc(element_num * sizeof(struct charger_plot_parameter));
+                if (tlbs == NULL) {
+                    chargererr("alloc plot tables no memory\n");
+                    goto fail;
+                }
+
+                charging_arry = cJSON_GetObjectItem(root, name);
+                if (charging_arry != NULL) {
+                    int i = 0;
+                    cJSON* parameter = charging_arry->child;
+                    while (parameter != NULL) {
+                        cJSON *temp_range_min_p, *temp_range_max_p, *vol_range_min_p, *vol_range_max_p, *charger_index_p, *work_current_p, *supply_vol_p;
+                        temp_range_min_p = cJSON_GetObjectItem(parameter, "temp_range_min");
+                        temp_range_max_p = cJSON_GetObjectItem(parameter, "temp_range_max");
+                        vol_range_min_p = cJSON_GetObjectItem(parameter, "vol_range_min");
+                        vol_range_max_p = cJSON_GetObjectItem(parameter, "vol_range_max");
+                        charger_index_p = cJSON_GetObjectItem(parameter, "charger_index");
+                        work_current_p = cJSON_GetObjectItem(parameter, "work_current");
+                        supply_vol_p = cJSON_GetObjectItem(parameter, "supply_vol");
+                        if (temp_range_min_p && temp_range_max_p && vol_range_min_p && vol_range_max_p && charger_index_p && work_current_p && supply_vol_p) {
+                            tlbs[i].temp_range_min = temp_range_min_p->valueint;
+                            tlbs[i].temp_range_max = temp_range_max_p->valueint;
+                            tlbs[i].vol_range_min = vol_range_min_p->valueint;
+                            tlbs[i].vol_range_max = vol_range_max_p->valueint;
+                            tlbs[i].charger_index = charger_index_p->valueint;
+                            tlbs[i].work_current = work_current_p->valueint;
+                            tlbs[i].supply_vol = supply_vol_p->valueint;
+
+                            i++;
+                        } else {
+                            chargererr("an element of the charging plot table is incomplete\n");
+                        }
+                        parameter = parameter->next;
+                    }
+                    desc->plot[desc->plots].tlbs = tlbs;
+                    desc->plot[desc->plots].parameters = element_num;
+                    desc->plot[desc->plots].mask = cJSON_GetObjectItem(charger_plot_table_index, "mask")->valueint;
+                } else {
+                    chargererr("The charging curve table named %s was not found.\n", name_p->valuestring);
+                    free(tlbs);
+                    tlbs = NULL;
+                }
+            }
+
+            charger_plot_table_index = charger_plot_table_index->next;
+        }
+    }
+
+    cJSON_Delete(root);
+    free(data);
+    return CHARGER_OK;
+
+fail:
+    for (int i = 0; i <= desc->plots; i++) {
+        if (desc->plot[i].tlbs != NULL) {
+            free(desc->plot[i].tlbs);
+            desc->plot[i].tlbs = NULL;
+        }
+    }
+    cJSON_Delete(root);
+    free(data);
+    return CHARGER_FAILED;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
