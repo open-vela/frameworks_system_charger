@@ -222,12 +222,14 @@ static int charger_desc_by_config(struct charger_desc* desc, const char* config)
                 strncpy(desc->charger[0], tmp, MAX_BUF_LEN);
             } else {
                 char* sub_str;
+                char* saveptr = NULL;
                 int index = -1;
-                sub_str = strtok(tmp, ";");
+
+                sub_str = strtok_r(tmp, ";", &saveptr);
                 while (sub_str != NULL) {
                     index++;
                     strncpy(desc->charger[index], sub_str, MAX_BUF_LEN);
-                    sub_str = strtok(NULL, ";");
+                    sub_str = strtok_r(NULL, ";", &saveptr);
                 }
             }
             continue;
@@ -246,13 +248,14 @@ static int charger_desc_by_config(struct charger_desc* desc, const char* config)
                 strncpy(desc->algo[0], tmp, MAX_BUF_LEN);
             } else {
                 char* sub_str;
+                char* saveptr = NULL;
                 int index = -1;
 
-                sub_str = strtok(tmp, ";");
+                sub_str = strtok_r(tmp, ";", &saveptr);
                 while (sub_str != NULL) {
                     index++;
                     strncpy(desc->algo[index], sub_str, MAX_BUF_LEN);
-                    sub_str = strtok(NULL, ";");
+                    sub_str = strtok_r(NULL, ";", &saveptr);
                 }
             }
             continue;
@@ -343,13 +346,14 @@ static int charger_desc_by_config(struct charger_desc* desc, const char* config)
             int tmp_array[7];
             int tmp_index = 0;
             char* sub_str;
+            char* saveptr = NULL;
             char* tmp = &buf[sizeof("charger_fault_plot_table=") - 1];
 
-            sub_str = strtok(tmp, ",");
+            sub_str = strtok_r(tmp, ",", &saveptr);
             while (sub_str) {
                 tmp_array[tmp_index] = atoi(sub_str);
                 tmp_index++;
-                sub_str = strtok(NULL, ",");
+                sub_str = strtok_r(NULL, ",", &saveptr);
                 if (tmp_index == 7) {
                     tmp_param.temp_range_min = tmp_array[0];
                     tmp_param.temp_range_max = tmp_array[1];
@@ -387,13 +391,14 @@ static int charger_desc_by_config(struct charger_desc* desc, const char* config)
                 int tmp_array[7];
                 int tmp_index = 0;
                 char* sub_str;
+                char* saveptr = NULL;
                 char* tmp = &buf[sizeof("{") - 1];
 
-                sub_str = strtok(tmp, ",");
+                sub_str = strtok_r(tmp, ",", &saveptr);
                 while (sub_str) {
                     tmp_array[tmp_index] = atoi(sub_str);
                     tmp_index++;
-                    sub_str = strtok(NULL, ",");
+                    sub_str = strtok_r(NULL, ",", &saveptr);
                     if (tmp_index == 7) {
                         tmp_param.temp_range_min = tmp_array[0];
                         tmp_param.temp_range_max = tmp_array[1];
