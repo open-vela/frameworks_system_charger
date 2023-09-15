@@ -180,7 +180,8 @@ fail:
     return CHARGER_FAILED;
 }
 
-static int charger_desc_by_config(struct charger_desc* desc, const char* config)
+#ifdef CONFIG_CHARGERD_TXT_FILE
+static int parse_charger_desc_config_by_txt(struct charger_desc* desc)
 {
     struct charger_plot_parameter tmp_charge_plot_table[MAX_NUM_PLOT_PARAMS];
     char buf[MAX_NUM_CHARS];
@@ -444,8 +445,10 @@ fail:
     fclose(f);
     return CHARGER_FAILED;
 }
+#endif
 
-static int charger_desc_by_json_config(struct charger_desc* desc, const char* parser)
+#ifdef CONFIG_CHARGERD_JSON_FILE
+static int parse_charger_desc_config_by_json(struct charger_desc* desc)
 {
     long length;
     char* data;
@@ -683,26 +686,26 @@ fail:
     free(data);
     return CHARGER_FAILED;
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int charger_desc_init(struct charger_desc* desc, const char* config)
+int charger_desc_init(struct charger_desc* desc)
 {
     int ret;
 
     memset(desc, 0, sizeof(struct charger_desc));
-    if (NULL == config) {
-        ret = charger_desc_default(desc);
-        if (ret < 0) {
-            chargererr("charger_desc_default failed");
-        }
-    } else {
-        ret = charger_desc_by_config(desc, config);
-        if (ret < 0) {
-            chargererr("charger_desc_by_config failed");
-        }
+
+#ifdef CONFIG_CHARGERD_JSON_FILE
+    ret = parse_charger_desc_config_by_json(desc);
+#else
+    ret = parse_charger_desc_config_by_txt(desc);
+#endif
+
+    if (ret < 0) {
+        chargererr("failed to parse charging related parameters\n");
     }
 
     return ret;

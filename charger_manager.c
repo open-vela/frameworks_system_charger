@@ -406,7 +406,7 @@ static int charger_manager_init(void)
     int seq;
     int ret;
 
-    ret = charger_desc_init(&g_charger_manager.desc, NULL);
+    ret = charger_desc_init(&g_charger_manager.desc);
     if (ret < 0) {
         chargererr("charger_desc_init failed\n");
         goto desc_fail;
