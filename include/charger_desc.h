@@ -81,7 +81,7 @@ struct charger_desc {
  * Public Function Prototypes
  ****************************************************************************/
 
-int charger_desc_init(struct charger_desc* desc, const char* config);
+int charger_desc_init(struct charger_desc* desc);
 void charger_desc_unit(struct charger_desc* desc);
 
 #endif
