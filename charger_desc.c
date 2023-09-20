@@ -610,12 +610,11 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
     if (charger_list != NULL) {
         cJSON* charger_plot_table_index;
 
-        desc->plots = -1;
+        desc->plots = 0;
         charger_plot_table_index = charger_list->child;
         while (charger_plot_table_index != NULL) {
             cJSON* name_p = cJSON_GetObjectItem(charger_plot_table_index, "name");
 
-            desc->plots++;
             if (name_p != NULL) {
                 int element_num;
                 struct charger_plot_parameter* tlbs;
@@ -660,6 +659,7 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
                     desc->plot[desc->plots].tlbs = tlbs;
                     desc->plot[desc->plots].parameters = element_num;
                     desc->plot[desc->plots].mask = cJSON_GetObjectItem(charger_plot_table_index, "mask")->valueint;
+                    desc->plots++;
                 } else {
                     chargererr("The charging curve table named %s was not found.\n", name_p->valuestring);
                     free(tlbs);
@@ -676,7 +676,7 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
     return CHARGER_OK;
 
 fail:
-    for (int i = 0; i <= desc->plots; i++) {
+    for (int i = 0; i < desc->plots; i++) {
         if (desc->plot[i].tlbs != NULL) {
             free(desc->plot[i].tlbs);
             desc->plot[i].tlbs = NULL;
