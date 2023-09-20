@@ -193,7 +193,7 @@ static int parse_charger_desc_config_by_txt(struct charger_desc* desc)
         return CHARGER_FAILED;
     }
 
-    desc->plots = -1;
+    desc->plots = 0;
 
     while (fgets(buf, MAX_NUM_CHARS, f)) {
         int ret = -1;
@@ -374,7 +374,6 @@ static int parse_charger_desc_config_by_txt(struct charger_desc* desc)
             int mask = 0;
             char* tmp = &buf[sizeof("charge_plot_table") - 1];
 
-            desc->plots++;
             while ((tmp = strstr(tmp, "_")) != NULL) {
                 mask = mask | (1 << atoi(tmp + 1));
                 tmp = tmp + 2;
@@ -426,6 +425,7 @@ static int parse_charger_desc_config_by_txt(struct charger_desc* desc)
             memcpy(tlbs, tmp_charge_plot_table, plot_table_size * sizeof(struct charger_plot_parameter));
             desc->plot[desc->plots].tlbs = tlbs;
             desc->plot[desc->plots].parameters = plot_table_size;
+            desc->plots++;
             plot_table_size = 0;
             memset(tmp_charge_plot_table, 0, sizeof(tmp_charge_plot_table));
             continue;
@@ -436,7 +436,7 @@ static int parse_charger_desc_config_by_txt(struct charger_desc* desc)
     return CHARGER_OK;
 
 fail:
-    for (int i = 0; i <= desc->plots; i++) {
+    for (int i = 0; i < desc->plots; i++) {
         if (desc->plot[i].tlbs != NULL) {
             free(desc->plot[i].tlbs);
             desc->plot[i].tlbs = NULL;
