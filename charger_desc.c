@@ -613,13 +613,13 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
         desc->plots = 0;
         charger_plot_table_index = charger_list->child;
         while (charger_plot_table_index != NULL) {
-            cJSON* name_p = cJSON_GetObjectItem(charger_plot_table_index, "name");
+            cJSON* name_ptr = cJSON_GetObjectItem(charger_plot_table_index, "name");
 
-            if (name_p != NULL) {
+            if (name_ptr != NULL) {
                 int element_num;
                 struct charger_plot_parameter* tlbs;
                 cJSON* charging_arry;
-                const char* name = name_p->valuestring;
+                const char* name = name_ptr->valuestring;
 
                 element_num = cJSON_GetObjectItem(charger_plot_table_index, "element_num")->valueint;
                 tlbs = (struct charger_plot_parameter*)malloc(element_num * sizeof(struct charger_plot_parameter));
@@ -628,40 +628,43 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
                     goto fail;
                 }
 
-                charging_arry = cJSON_GetObjectItem(root, name);
+                charging_arry = cJSON_GetObjectItem(charger_plot_table_index, name);
                 if (charging_arry != NULL) {
-                    int i = 0;
-                    cJSON* parameter = charging_arry->child;
-                    while (parameter != NULL) {
-                        cJSON *temp_range_min_p, *temp_range_max_p, *vol_range_min_p, *vol_range_max_p, *charger_index_p, *work_current_p, *supply_vol_p;
-                        temp_range_min_p = cJSON_GetObjectItem(parameter, "temp_range_min");
-                        temp_range_max_p = cJSON_GetObjectItem(parameter, "temp_range_max");
-                        vol_range_min_p = cJSON_GetObjectItem(parameter, "vol_range_min");
-                        vol_range_max_p = cJSON_GetObjectItem(parameter, "vol_range_max");
-                        charger_index_p = cJSON_GetObjectItem(parameter, "charger_index");
-                        work_current_p = cJSON_GetObjectItem(parameter, "work_current");
-                        supply_vol_p = cJSON_GetObjectItem(parameter, "supply_vol");
-                        if (temp_range_min_p && temp_range_max_p && vol_range_min_p && vol_range_max_p && charger_index_p && work_current_p && supply_vol_p) {
-                            tlbs[i].temp_range_min = temp_range_min_p->valueint;
-                            tlbs[i].temp_range_max = temp_range_max_p->valueint;
-                            tlbs[i].vol_range_min = vol_range_min_p->valueint;
-                            tlbs[i].vol_range_max = vol_range_max_p->valueint;
-                            tlbs[i].charger_index = charger_index_p->valueint;
-                            tlbs[i].work_current = work_current_p->valueint;
-                            tlbs[i].supply_vol = supply_vol_p->valueint;
-
-                            i++;
-                        } else {
-                            chargererr("an element of the charging plot table is incomplete\n");
-                        }
-                        parameter = parameter->next;
+                    if (!cJSON_IsArray(charging_arry)) {
+                        chargererr("%s is not a json array\n", name);
+                        continue;
                     }
+
+                    for (int i = 0; i < cJSON_GetArraySize(charging_arry); i++) {
+                        cJSON* parameter = cJSON_GetArrayItem(charging_arry, i);
+                        if (!cJSON_IsArray(parameter)) {
+                            chargererr("%s is not a json array\n", parameter->valuestring);
+                            continue;
+                        }
+
+                        int tmp_array[7];
+                        int item_size = cJSON_GetArraySize(parameter);
+                        for (int j = 0; j < item_size; j++) {
+                            cJSON* item = cJSON_GetArrayItem(parameter, j);
+                            tmp_array[j] = item->valueint;
+                            if (j == 6) {
+                                tlbs[i].temp_range_min = tmp_array[0];
+                                tlbs[i].temp_range_max = tmp_array[1];
+                                tlbs[i].vol_range_min = tmp_array[2];
+                                tlbs[i].vol_range_max = tmp_array[3];
+                                tlbs[i].charger_index = tmp_array[4];
+                                tlbs[i].work_current = tmp_array[5];
+                                tlbs[i].supply_vol = tmp_array[6];
+                            }
+                        }
+                    }
+
                     desc->plot[desc->plots].tlbs = tlbs;
                     desc->plot[desc->plots].parameters = element_num;
                     desc->plot[desc->plots].mask = cJSON_GetObjectItem(charger_plot_table_index, "mask")->valueint;
                     desc->plots++;
                 } else {
-                    chargererr("The charging curve table named %s was not found.\n", name_p->valuestring);
+                    chargererr("The charging curve table named %s was not found.\n", name_ptr->valuestring);
                     free(tlbs);
                     tlbs = NULL;
                 }
@@ -669,6 +672,8 @@ static int parse_charger_desc_config_by_json(struct charger_desc* desc)
 
             charger_plot_table_index = charger_plot_table_index->next;
         }
+    } else {
+        chargererr("charger plot table not found!\n");
     }
 
     cJSON_Delete(root);
