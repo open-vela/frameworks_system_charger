@@ -1,0 +1,86 @@
+{
+    "charger_supply" : "/dev/charge/wireless_rx",
+    "charger_adapter" : "/dev/charge/wireless_rx",
+    "charger" : "/dev/charge/batt_charger;/dev/charge/charger_pump",
+    "fuel_gauge" : "/dev/charge/batt_gauge",
+    "algo" : "buck;pump",
+
+    "chargers" : 2,
+    "polling_interval_ms" : 1000,
+    "fullbatt_capacity" : 100,
+    "fullbatt_current" : 0,
+    "fullbatt_duration_ms" : 180000,
+    "fault_duration_ms" : 60000,
+    "temp_min" : 10,
+    "temp_min_r" : 20,
+    "temp_max" : 450,
+    "temp_max_r" : 440,
+    "temp_skin" : 400,
+    "temp_skin_r" : 390,
+    "enable_delay_ms" : 3000,
+
+    "charger_fault_plot_table" : [
+        {
+            "temp_range_min" : 160,
+            "temp_range_max" : 449,
+            "vol_range_min" : 2100,
+            "vol_range_max" : 65535,
+            "charger_index" : 0,
+            "work_current" : 145,
+            "supply_vol" : 5500
+        }
+    ],
+
+    "charger_plot_table_list" : [
+        {
+            "name" : "g_charger_plot_table",
+            "mask" : 8,
+            "element_num" : 15,
+            "g_charger_plot_table" : [
+                [-500,0,0,65535,-1,0,0],
+                [1,119,2100,3000,0,20,5500],
+                [1,119,3000,4435,0,145,5500],
+                [1,119,4435,65535,0,145,5500],
+                [120,159,2100,3000,0,20,5500],
+                [120,159,3000,3600,0,145,5500],
+                [120,159,3600,4140,0,486,5500],
+                [120,159,4140,4435,0,340,5500],
+                [120,159,4435,65535,0,340,5500],
+                [160,449,2100,3000,0,20,5500],
+                [160,449,3000,3650,0,145,5500],
+                [160,449,3650,4140,1,920,0],
+                [160,449,4140,4435,0,729,5500],
+                [160,449,4435,65535,0,729,5500],
+                [450,65535,0,65535,-1,0,0]
+            ]
+        },
+        {
+            "name" : "g_charger_plot_table_noStand_type3",
+            "mask" : 4,
+            "element_num" : 9,
+            "g_charger_plot_table_noStand_type3" : [
+                [-500,0,0,65535,-1,0,0],
+                [1,159,2100,3000,0,20,5500],
+                [1,159,3000,4435,0,145,5500],
+                [1,159,4435,65535,0,145,5500],
+                [160,449,2100,3000,0,20,5500],
+                [160,449,3000,3600,0,145,5500],
+                [160,449,3600,4435,0,486,5500],
+                [160,449,4435,65535,0,486,5500],
+                [450,65535,0,65535,-1,0,0]
+            ]
+        },
+        {
+            "name" : "g_charger_plot_table_noStand",
+            "mask" : 3,
+            "element_num" : 4,
+            "g_charger_plot_table_noStand" : [
+                [-500,0,0,65535,-1,0,0],
+                [1,39,2100,65535,0,140,5500],
+                [40,449,2100,65535,0,150,5500],
+                [450,65535,0,65535,-1,0,0]
+            ]
+        }
+    ]
+
+}
