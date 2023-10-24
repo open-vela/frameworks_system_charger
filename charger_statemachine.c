@@ -30,7 +30,9 @@ PM_WAKELOCK_DECLARE_STATIC(g_pm_wakelock_chargerd, "chargerd_wakelock", PM_IDLE_
 #endif
 
 static bool delay_lock = false;
+#if defined(CONFIG_PM)
 static bool pm_lock = false;
+#endif
 
 /****************************************************************************
  * Private Functions
