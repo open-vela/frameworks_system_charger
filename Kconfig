@@ -19,6 +19,7 @@ menu "CHARGERD CONFIG"
 config CHARGERD
 	bool "chargerd"
 	depends on BATTERY_CHARGER && BATTERY_GAUGE
+	select NETUTILS_CJSON
 	default n
 	---help---
 		This application is used to manager charge logic
@@ -31,23 +32,9 @@ config CHARGERD_HWINTF_CONVERSION
 	---help---
 		This application is used to battery data conversion
 
-choice
-	prompt "format of chargerd configuration file"
-	default CHARGERD_JSON_FILE
-
-config CHARGERD_JSON_FILE
-	bool "chargerd json file"
-	select NETUTILS_CJSON
-
-config CHARGERD_TXT_FILE
-	bool "chargerd txt file"
-
-endchoice
-
 config CHARGER_CONFIGURATION_FILE_PATH
 	string "File path of charging related configuration parameters"
-	default "/etc/charger_parameters.json" if CHARGERD_JSON_FILE
-	default "/etc/charger_parameters.txt" if CHARGERD_TXT_FILE
+	default "/etc/charger_parameters.json"
 
 config CHARGERD_PROGNAME
 	string "Program name"
