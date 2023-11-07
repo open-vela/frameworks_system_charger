@@ -373,10 +373,12 @@ static int charger_dev_init(void)
 
     for (i = 0; i < g_charger_manager.desc.chargers; i++) {
         dev = g_charger_manager.desc.charger[i];
-        if ((fd = charger_dev_open(dev)) < 0) {
-            goto fail;
+        if (dev[0]) {
+            if ((fd = charger_dev_open(dev)) < 0) {
+                goto fail;
+            }
+            g_charger_manager.charger_fd[i] = fd;
         }
-        g_charger_manager.charger_fd[i] = fd;
     }
     return CHARGER_OK;
 fail:
