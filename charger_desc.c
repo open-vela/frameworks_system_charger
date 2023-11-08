@@ -76,6 +76,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         if ((strstr(tmp_pointer->valuestring, ";")) == NULL) {
             strncpy(desc->charger[0], tmp_pointer->valuestring, MAX_BUF_LEN);
+            desc->chargers = 1;
         } else {
             char* sub_str;
             char* saveptr = NULL;
@@ -87,6 +88,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
                 strncpy(desc->charger[index], sub_str, MAX_BUF_LEN);
                 sub_str = strtok_r(NULL, ";", &saveptr);
             }
+            desc->chargers = index + 1;
         }
     }
     tmp_pointer = cJSON_GetObjectItem(root, "fuel_gauge");
@@ -111,10 +113,6 @@ static int parse_charger_desc_config(struct charger_desc* desc)
         }
     }
 
-    tmp_pointer = cJSON_GetObjectItem(root, "chargers");
-    if (tmp_pointer) {
-        desc->chargers = tmp_pointer->valueint;
-    }
     tmp_pointer = cJSON_GetObjectItem(root, "polling_interval_ms");
     if (tmp_pointer) {
         desc->polling_interval_ms = tmp_pointer->valueint;
