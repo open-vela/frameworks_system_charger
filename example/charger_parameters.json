@@ -5,7 +5,6 @@
     "fuel_gauge" : "/dev/charge/batt_gauge",
     "algo" : "buck;pump",
 
-    "chargers" : 2,
     "polling_interval_ms" : 1000,
     "fullbatt_capacity" : 100,
     "fullbatt_current" : 0,
