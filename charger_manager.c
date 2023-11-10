@@ -424,7 +424,7 @@ static int charger_manager_init(void)
         goto algo_fail;
     }
     if (charger_event_engine_init() < 0) {
-        chargererr("charger_desc_init failed\n");
+        chargererr("charger_event_engine_init failed\n");
         goto algo_fail;
     }
     g_charger_manager.currstate = CHARGER_STATE_INIT;
