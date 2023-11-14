@@ -36,7 +36,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
 {
     long length;
     char* data;
-    cJSON *root, *tmp_pointer, *charging_fault_arry, *charger_list;
+    cJSON *root, *tmp_pointer, *battery_default_param, *charging_fault_arry, *charger_list;
 
     FILE* file = fopen(CONFIG_CHARGER_CONFIGURATION_FILE_PATH, "r");
     if (!file) {
@@ -160,6 +160,26 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     tmp_pointer = cJSON_GetObjectItem(root, "enable_delay_ms");
     if (tmp_pointer) {
         desc->enable_delay_ms = tmp_pointer->valueint;
+    }
+
+    battery_default_param = cJSON_GetObjectItem(root, "battery_default_param");
+    if (battery_default_param != NULL) {
+        cJSON* parameter = battery_default_param->child;
+        if (parameter != NULL) {
+            cJSON *capacity_p, *current_p, *temp_p, *vol_p;
+            capacity_p = cJSON_GetObjectItem(parameter, "capacity");
+            current_p = cJSON_GetObjectItem(parameter, "current");
+            temp_p = cJSON_GetObjectItem(parameter, "temp");
+            vol_p = cJSON_GetObjectItem(parameter, "vol");
+            if (capacity_p && current_p && temp_p && vol_p) {
+                desc->default_param.capacity = capacity_p->valueint;
+                desc->default_param.current = current_p->valueint;
+                desc->default_param.temp = temp_p->valueint;
+                desc->default_param.vol = vol_p->valueint;
+            } else {
+                chargererr("an element of the battery default param is incomplete\n");
+            }
+        }
     }
 
     charging_fault_arry = cJSON_GetObjectItem(root, "charger_fault_plot_table");

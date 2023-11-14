@@ -37,6 +37,13 @@
  * Public Types
  ****************************************************************************/
 
+struct battery_default_parameter {
+    int capacity;
+    int current;
+    int temp;
+    int vol;
+};
+
 struct charger_plot_parameter {
     int temp_range_min;
     int temp_range_max;
@@ -74,6 +81,7 @@ struct charger_desc {
     struct charger_plot plot[MAX_PLOTS];
     int plots;
     struct charger_plot_parameter fault;
+    struct battery_default_parameter default_param;
     unsigned int enable_delay_ms;
 };
 
