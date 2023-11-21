@@ -291,10 +291,12 @@ static int charger_chg_proc(struct charger_manager* data)
     }
 
     pa = check_charger_plot(temp, vol, data->protocol);
-    if (NULL == pa || pa->charger_index == CHARGER_INDEX_INVAILD) {
-        chargerwarn("temp:%d vol:%d not find the plot_parameter"
-                    " or charger_index is invaild\n",
-            temp, vol);
+    if (NULL == pa) {
+        chargerwarn("temp:%d vol:%d were not found in the plot\n",
+                    temp, vol);
+        pa = &data->desc.fault;
+    }else if(pa->charger_index == CHARGER_INDEX_INVAILD) {
+        chargerwarn("charger_index is invaild\n");
         charger_chg_proc_algostop(data);
         return CHARGER_OK;
     }
