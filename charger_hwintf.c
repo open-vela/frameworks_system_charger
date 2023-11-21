@@ -297,14 +297,14 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
     ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
     if(gauge_inited){
         ret = ioctl(manager->gauge_fd, BATIOC_VOLTAGE, (unsigned long)((uintptr_t) & (vol)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_VOLTAGE) failed: %d\n", errno);
-            return CHARGER_FAILED;
+            goto battery_default;
         }
 
 #ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
@@ -314,9 +314,13 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
 #endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
+    return CHARGER_OK;
+
+battery_default:
+    *voltage = manager->desc.default_param.vol;
     return CHARGER_OK;
 }
 
@@ -348,14 +352,14 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
     ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
     if(gauge_inited){
         ret = ioctl(manager->gauge_fd, BATIOC_CAPACITY, (unsigned long)((uintptr_t) & (cap)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_CAPACITY) failed: %d\n", errno);
-            return CHARGER_FAILED;
+            goto battery_default;
         }
 
 #ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
@@ -365,9 +369,13 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
 #endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
+    return CHARGER_OK;
+
+battery_default:
+    *capacity = manager->desc.default_param.capacity;
     return CHARGER_OK;
 }
 
@@ -399,14 +407,14 @@ int get_battery_temp(struct charger_manager* manager, int* val)
     ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
     if(gauge_inited){
         ret = ioctl(manager->gauge_fd, BATIOC_TEMPERATURE, (unsigned long)((uintptr_t) & (temp)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_TEMPERATURE) failed: %d\n", errno);
-            return CHARGER_FAILED;
+            goto battery_default;
         }
 
 #ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
@@ -416,9 +424,13 @@ int get_battery_temp(struct charger_manager* manager, int* val)
 #endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
+    return CHARGER_OK;
+
+battery_default:
+    *val = manager->desc.default_param.temp;
     return CHARGER_OK;
 }
 
@@ -450,14 +462,14 @@ int get_battery_current(struct charger_manager* manager, int* cur)
     ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
     if(gauge_inited){
         ret = ioctl(manager->gauge_fd, BATIOC_CURRENT, (unsigned long)((uintptr_t) & (current)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_CURRENT) failed: %d\n", errno);
-            return CHARGER_FAILED;
+           goto battery_default;
         }
 
 #ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
@@ -467,9 +479,13 @@ int get_battery_current(struct charger_manager* manager, int* cur)
 #endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
-        return CHARGER_FAILED;
+        goto battery_default;
     }
 
+    return CHARGER_OK;
+
+battery_default:
+    *cur = manager->desc.default_param.current;
     return CHARGER_OK;
 }
 
