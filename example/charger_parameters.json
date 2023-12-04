@@ -18,6 +18,15 @@
     "temp_skin_r" : 390,
     "enable_delay_ms" : 3000,
 
+    "battery_default_param" : [
+        {
+            "capacity" : 0,
+            "current" : 0,
+            "temp" : 110,
+            "vol" : 2100
+        }
+    ],
+
     "charger_fault_plot_table" : [
         {
             "temp_range_min" : 160,
