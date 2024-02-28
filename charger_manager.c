@@ -241,7 +241,7 @@ static int register_state_events(void)
     attr.mq_msgsize = sizeof(charger_msg_t);
     attr.mq_curmsgs = 0;
     attr.mq_flags = 0;
-    recive_mq = mq_open(MQ_MSG_NAME, O_RDWR | O_CREAT | O_NONBLOCK, 0644, &attr);
+    recive_mq = mq_open(MQ_MSG_NAME, O_RDWR | O_CREAT | O_NONBLOCK | O_CLOEXEC, 0644, &attr);
     if (recive_mq == (mqd_t)CHARGER_FD_INVAILD) {
         chargererr("err open mq;\r\n");
         return CHARGER_FAILED;
@@ -557,7 +557,7 @@ int send_charger_msg(charger_msg_t msg)
     attr.mq_msgsize = sizeof(charger_msg_t);
     attr.mq_curmsgs = 0;
     attr.mq_flags = 0;
-    mq = mq_open(MQ_MSG_NAME, O_RDWR | O_CREAT | O_NONBLOCK, 0644, &attr);
+    mq = mq_open(MQ_MSG_NAME, O_RDWR | O_CREAT | O_NONBLOCK | O_CLOEXEC, 0644, &attr);
     if (mq == (mqd_t)CHARGER_FD_INVAILD) {
         chargererr("%s:open mq failed;\r\n", __FUNCTION__);
         return CHARGER_FAILED;
