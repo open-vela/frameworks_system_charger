@@ -167,12 +167,26 @@ int get_supply_voltage(struct charger_manager* manager, int* vol)
 int enable_charger(struct charger_manager* manager, int seq, bool enable)
 {
     int ret;
+    int index;
     struct batio_operate_msg_s msg;
 
     if (seq >= manager->desc.chargers && manager->charger_fd[seq] < 0) {
         chargererr("Error: charger not exsit\n");
         return CHARGER_FAILED;
     }
+
+    if (enable) {
+        for (index = 0; index < manager->desc.chargers; index++) {
+            if (seq != index) {
+                ret = enable_charger(manager, index, false);
+                if (ret < 0) {
+                    chargererr("Error: disable charger %d failed (%d)\n", index, ret);
+                    return CHARGER_FAILED;
+                }
+            }
+        }
+    }
+
     msg.operate_type = BATIO_OPRTN_CHARGE;
     msg.u32 = enable ? 1 : 0;
 
@@ -294,14 +308,14 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
-    if(gauge_inited){
-        ret = ioctl(manager->gauge_fd, BATIOC_VOLTAGE, (unsigned long)((uintptr_t) & (vol)));
+    if (gauge_inited) {
+        ret = ioctl(manager->gauge_fd, BATIOC_VOLTAGE, (unsigned long)((uintptr_t)(&vol)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_VOLTAGE) failed: %d\n", errno);
             goto battery_default;
@@ -349,14 +363,14 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
-    if(gauge_inited){
-        ret = ioctl(manager->gauge_fd, BATIOC_CAPACITY, (unsigned long)((uintptr_t) & (cap)));
+    if (gauge_inited) {
+        ret = ioctl(manager->gauge_fd, BATIOC_CAPACITY, (unsigned long)((uintptr_t)(&cap)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_CAPACITY) failed: %d\n", errno);
             goto battery_default;
@@ -404,14 +418,14 @@ int get_battery_temp(struct charger_manager* manager, int* val)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
-    if(gauge_inited){
-        ret = ioctl(manager->gauge_fd, BATIOC_TEMPERATURE, (unsigned long)((uintptr_t) & (temp)));
+    if (gauge_inited) {
+        ret = ioctl(manager->gauge_fd, BATIOC_TEMPERATURE, (unsigned long)((uintptr_t)(&temp)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_TEMPERATURE) failed: %d\n", errno);
             goto battery_default;
@@ -459,17 +473,17 @@ int get_battery_current(struct charger_manager* manager, int* cur)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
-    if(gauge_inited){
-        ret = ioctl(manager->gauge_fd, BATIOC_CURRENT, (unsigned long)((uintptr_t) & (current)));
+    if (gauge_inited) {
+        ret = ioctl(manager->gauge_fd, BATIOC_CURRENT, (unsigned long)((uintptr_t)(&current)));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_CURRENT) failed: %d\n", errno);
-           goto battery_default;
+            goto battery_default;
         }
 
 #ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
@@ -513,13 +527,13 @@ int get_battery_status(struct charger_manager* manager, enum battery_status_e* s
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)&(gauge_inited)));
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         return CHARGER_FAILED;
     }
 
-    if(gauge_inited){
+    if (gauge_inited) {
         ret = ioctl(manager->gauge_fd, BATIOC_STATE, (unsigned long)((uintptr_t)state));
         if (ret < 0) {
             chargererr("ERROR: ioctl(BATIOC_STATE) failed: %d\n", errno);
@@ -527,6 +541,36 @@ int get_battery_status(struct charger_manager* manager, enum battery_status_e* s
     } else {
         chargererr("gauge has not been initialized successfully\n");
         return CHARGER_FAILED;
+    }
+
+    return ret;
+}
+
+/****************************************************************************
+ * Name: set_battery_vbus_state
+ *
+ * Description:
+ *   set vbus state to battery driver
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   enable - the vbus state
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int set_battery_vbus_state(struct charger_manager* manager, bool enable)
+{
+    int ret;
+    struct batio_operate_msg_s msg;
+
+    msg.operate_type = BATIO_OPRTN_VBUS_STATE;
+    msg.u32 = enable;
+
+    ret = ioctl(manager->gauge_fd, BATIOC_OPERATE, (unsigned long)((uintptr_t)&msg));
+    if (ret < 0) {
+        chargererr("Error: ioctl(BATIOC_OPERATE) failed: %d\n", errno);
     }
 
     return ret;

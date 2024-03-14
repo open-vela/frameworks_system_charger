@@ -136,6 +136,7 @@ static int charger_state_init(struct charger_manager* data, charger_msg_t* peven
 
     if (NULL == pevent) {
         charger_timer_stop(&data->env_timer_id);
+        set_battery_vbus_state(data, false);
         charger_sleep();
         return CHARGER_OK;
     }
@@ -146,6 +147,7 @@ static int charger_state_init(struct charger_manager* data, charger_msg_t* peven
             chargererr("creat timer failed;\n");
             return CHARGER_FAILED;
         }
+        set_battery_vbus_state(data, true);
         charger_wakup();
         ret = update_charger_protocol(data);
         if (data->temp_protect_lock) {
@@ -293,9 +295,9 @@ static int charger_chg_proc(struct charger_manager* data)
     pa = check_charger_plot(temp, vol, data->protocol);
     if (NULL == pa) {
         chargerwarn("temp:%d vol:%d were not found in the plot\n",
-                    temp, vol);
+            temp, vol);
         pa = &data->desc.fault;
-    }else if(pa->charger_index == CHARGER_INDEX_INVAILD) {
+    } else if (pa->charger_index == CHARGER_INDEX_INVAILD) {
         chargerwarn("charger_index is invaild\n");
         charger_chg_proc_algostop(data);
         return CHARGER_OK;

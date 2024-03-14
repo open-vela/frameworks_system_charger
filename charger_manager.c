@@ -405,7 +405,6 @@ static void charger_dev_unit(void)
 
 static int charger_manager_init(void)
 {
-    int seq;
     int ret;
 
     ret = charger_desc_init(&g_charger_manager.desc);
@@ -436,12 +435,7 @@ static int charger_manager_init(void)
             goto fail;
         }
     }
-    for (seq = 0; seq < g_charger_manager.desc.chargers; seq++) {
-        ret = enable_charger(&g_charger_manager, seq, false);
-        if (ret < 0) {
-            goto fail;
-        }
-    }
+
     return CHARGER_OK;
 fail:
     charger_event_engine_unit();
