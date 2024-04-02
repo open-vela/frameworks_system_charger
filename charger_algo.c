@@ -104,6 +104,11 @@ static int buck_algo_start(struct charger_algo* algo)
         chargererr("enable charger %d failed\n", algo->index);
         return CHARGER_FAILED;
     }
+
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+    set_battery_charge_state(algo->cm, BATTERY_CHARGING);
+#endif
+
     memset(&algo->sp, 0, sizeof(struct charger_plot_parameter));
     return CHARGER_OK;
 }
@@ -112,6 +117,11 @@ static int buck_algo_update(struct charger_algo* algo, struct charger_plot_param
 {
     int ret = CHARGER_OK;
 
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+    unsigned int state = BATTERY_CHARGING;
+    get_charger_state(algo->cm, pa->charger_index, &state);
+    set_battery_charge_state(algo->cm, state);
+#endif
     if (pa && is_pa_changed(&algo->sp, pa)) {
         chargerinfo("buck_algo_update t_min:%d t_max:%d v_min:%d v_max:%d index:%d"
                     "current:%d supply_vol:%d\n",
@@ -149,6 +159,10 @@ static int buck_algo_stop(struct charger_algo* algo)
         chargererr("disable charger %d failed\n", algo->index);
         return CHARGER_FAILED;
     }
+
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+    set_battery_charge_state(algo->cm, BATTERY_IDLE);
+#endif
 
     if (is_supply_exist()) {
         ret = set_supply_voltage(algo->cm, BUCK_ALGO_INIT_VOL);
@@ -203,6 +217,11 @@ static int pump_algo_start(struct charger_algo* algo)
         enable_charger(algo->cm, algo->index, false);
         return CHARGER_FAILED;
     }
+
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+    set_battery_charge_state(algo->cm, BATTERY_CHARGING);
+#endif
+
     memset(&algo->sp, 0, sizeof(struct charger_plot_parameter));
     return CHARGER_OK;
 }
@@ -273,6 +292,10 @@ static int pump_algo_stop(struct charger_algo* algo)
         chargererr("disable charger %d failed\n", algo->index);
         return CHARGER_FAILED;
     }
+
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+    set_battery_charge_state(algo->cm, BATTERY_IDLE);
+#endif
 
     if (is_supply_exist()) {
         ret = set_supply_voltage(algo->cm, PUMP_CONF_STARTUP_VOLTAGE);
