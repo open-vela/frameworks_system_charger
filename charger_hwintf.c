@@ -575,3 +575,35 @@ int set_battery_vbus_state(struct charger_manager* manager, bool enable)
 
     return ret;
 }
+
+/****************************************************************************
+ * Name: set_battery_charge_state
+ *
+ * Description:
+ *   set charge state to battery driver
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   state - the charge state
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
+int set_battery_charge_state(struct charger_manager* manager, unsigned int state)
+{
+    int ret;
+    struct batio_operate_msg_s msg;
+
+    msg.operate_type = BATIO_OPRTN_CHARGER_STATE;
+    msg.u32 = state;
+
+    ret = ioctl(manager->gauge_fd, BATIOC_OPERATE, (unsigned long)((uintptr_t)&msg));
+    if (ret < 0) {
+        chargererr("Error: ioctl(BATIOC_OPERATE) failed: %d\n", errno);
+    }
+
+    return ret;
+}
+#endif
