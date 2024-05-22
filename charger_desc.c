@@ -66,16 +66,16 @@ static int parse_charger_desc_config(struct charger_desc* desc)
 
     tmp_pointer = cJSON_GetObjectItem(root, "charger_supply");
     if (tmp_pointer) {
-        strncpy(desc->charger_supply, tmp_pointer->valuestring, MAX_BUF_LEN);
+        strlcpy(desc->charger_supply, tmp_pointer->valuestring, MAX_BUF_LEN);
     }
     tmp_pointer = cJSON_GetObjectItem(root, "charger_adapter");
     if (tmp_pointer) {
-        strncpy(desc->charger_adapter, tmp_pointer->valuestring, MAX_BUF_LEN);
+        strlcpy(desc->charger_adapter, tmp_pointer->valuestring, MAX_BUF_LEN);
     }
     tmp_pointer = cJSON_GetObjectItem(root, "charger");
     if (tmp_pointer) {
         if ((strstr(tmp_pointer->valuestring, ";")) == NULL) {
-            strncpy(desc->charger[0], tmp_pointer->valuestring, MAX_BUF_LEN);
+            strlcpy(desc->charger[0], tmp_pointer->valuestring, MAX_BUF_LEN);
             desc->chargers = 1;
         } else {
             char* sub_str;
@@ -85,7 +85,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
             sub_str = strtok_r(tmp_pointer->valuestring, ";", &saveptr);
             while (sub_str != NULL) {
                 index++;
-                strncpy(desc->charger[index], sub_str, MAX_BUF_LEN);
+                strlcpy(desc->charger[index], sub_str, MAX_BUF_LEN);
                 sub_str = strtok_r(NULL, ";", &saveptr);
             }
             desc->chargers = index + 1;
@@ -93,12 +93,12 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     }
     tmp_pointer = cJSON_GetObjectItem(root, "fuel_gauge");
     if (tmp_pointer) {
-        strncpy(desc->fuel_gauge, tmp_pointer->valuestring, MAX_BUF_LEN);
+        strlcpy(desc->fuel_gauge, tmp_pointer->valuestring, MAX_BUF_LEN);
     }
     tmp_pointer = cJSON_GetObjectItem(root, "algo");
     if (tmp_pointer) {
         if ((strstr(tmp_pointer->valuestring, ";")) == NULL) {
-            strncpy(desc->algo[0], tmp_pointer->valuestring, MAX_BUF_LEN);
+            strlcpy(desc->algo[0], tmp_pointer->valuestring, MAX_BUF_LEN);
         } else {
             char* sub_str;
             char* saveptr = NULL;
@@ -107,7 +107,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
             sub_str = strtok_r(tmp_pointer->valuestring, ";", &saveptr);
             while (sub_str != NULL) {
                 index++;
-                strncpy(desc->algo[index], sub_str, MAX_BUF_LEN);
+                strlcpy(desc->algo[index], sub_str, MAX_BUF_LEN);
                 sub_str = strtok_r(NULL, ";", &saveptr);
             }
         }
