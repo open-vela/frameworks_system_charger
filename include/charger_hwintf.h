@@ -35,6 +35,7 @@ int get_adapter_type(struct charger_manager* manager, int* type);
 int set_supply_voltage(struct charger_manager* manager, int vol);
 int get_supply_voltage(struct charger_manager* manager, int* vol);
 int enable_charger(struct charger_manager* manager, int seq, bool enable);
+int set_charger_voltage(struct charger_manager* manager, int seq, int vol);
 int set_charger_current(struct charger_manager* manager, int seq, int current);
 int get_charger_state(struct charger_manager* manager, int seq, unsigned int* state);
 int get_adapter_type_by_charger(struct charger_manager* manager, int* type);

@@ -199,6 +199,38 @@ int enable_charger(struct charger_manager* manager, int seq, bool enable)
 }
 
 /****************************************************************************
+ * Name: set_charger_voltage()
+ *
+ * Description:
+ *   set the float voltage
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   seq - the index of the charger
+ *   vol - voltage value (mV)
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int set_charger_voltage(struct charger_manager* manager, int seq, int vol)
+{
+    int ret;
+
+    if (seq >= manager->desc.chargers && manager->charger_fd[seq] < 0) {
+        chargererr("Error: charger not exsit\n");
+        return CHARGER_FAILED;
+    }
+
+    ret = ioctl(manager->charger_fd[seq], BATIOC_VOLTAGE, (unsigned long)((uintptr_t)&vol));
+    if (ret < 0) {
+        chargererr("Error: ioctl(BATIOC_VOLTAGE) failed: %d\n", errno);
+        return CHARGER_FAILED;
+    }
+    return CHARGER_OK;
+}
+
+/****************************************************************************
  * Name: set_charger_current
  *
  * Description:
