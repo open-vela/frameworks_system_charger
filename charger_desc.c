@@ -37,6 +37,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     long length;
     char* data;
     cJSON *root, *tmp_pointer, *battery_default_param, *charging_fault_arry, *charger_list;
+    cJSON* temp_term_volt_table;
 
     FILE* file = fopen(CONFIG_CHARGER_CONFIGURATION_FILE_PATH, "r");
     if (!file) {
@@ -276,6 +277,47 @@ static int parse_charger_desc_config(struct charger_desc* desc)
         }
     } else {
         chargererr("charger plot table not found!\n");
+    }
+
+    temp_term_volt_table = cJSON_GetObjectItem(root, "temperature_termination_voltage_table");
+    if (temp_term_volt_table != NULL) {
+        cJSON* temp_vterm_param = temp_term_volt_table->child;
+        if (temp_vterm_param != NULL) {
+            cJSON *relation_table, *temp_vterm_enable, *temp_rise_hys, *temp_fall_hys;
+            temp_vterm_enable = cJSON_GetObjectItem(temp_vterm_param, "temp_vterm_enable");
+            temp_rise_hys = cJSON_GetObjectItem(temp_vterm_param, "temp_rise_hys");
+            temp_fall_hys = cJSON_GetObjectItem(temp_vterm_param, "temp_fall_hys");
+            if (temp_vterm_enable && temp_rise_hys && temp_fall_hys) {
+                desc->temp_vterm.enable = temp_vterm_enable->valueint;
+                desc->temp_vterm.rise_hys = temp_rise_hys->valueint;
+                desc->temp_vterm.fall_hys = temp_fall_hys->valueint;
+            }
+
+            relation_table = cJSON_GetObjectItem(temp_vterm_param, "relation_table");
+            if (relation_table != NULL) {
+                for (int i = 0; i < cJSON_GetArraySize(relation_table); i++) {
+                    cJSON* vterm_parameter = cJSON_GetArrayItem(relation_table, i);
+                    if (!cJSON_IsArray(vterm_parameter)) {
+                        chargererr("temp_vterm is not a json relation_table\n");
+                        continue;
+                    }
+
+                    int vterm_tmp_array[3];
+                    int vterm_item_size = cJSON_GetArraySize(vterm_parameter);
+                    for (int j = 0; j < vterm_item_size; j++) {
+                        cJSON* vterm_item = cJSON_GetArrayItem(vterm_parameter, j);
+                        vterm_tmp_array[j] = vterm_item->valueint;
+                        if (j == 2) {
+                            desc->temp_vterm.ranges[i].low_threshold = vterm_tmp_array[0];
+                            desc->temp_vterm.ranges[i].high_threshold = vterm_tmp_array[1];
+                            desc->temp_vterm.ranges[i].value = vterm_tmp_array[2];
+                        }
+                    }
+                }
+            } else {
+                chargererr("temperature_termination_voltage relation_table not found\n");
+            }
+        }
     }
 
     cJSON_Delete(root);

@@ -89,6 +89,20 @@
                 [450,65535,0,65535,-1,0,0]
             ]
         }
-    ]
+    ],
 
+    "temperature_termination_voltage_table" : [
+        {
+            "temp_vterm_enable" : 1,
+            "temp_rise_hys" : 20,
+            "temp_fall_hys" : 20,
+            "relation_table" : [
+                [-100,0,3000],
+                [1,100,3000],
+                [101,150,4000],
+                [151,450,4400],
+                [451,600,4000]
+            ]
+        }
+    ]
 }

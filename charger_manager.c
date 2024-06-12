@@ -128,6 +128,127 @@ static int check_temp_event(void)
     return ret;
 }
 
+static int get_val(struct range_data* range, int rise_hys, int fall_hys,
+    int current_index, int threshold, int* new_index, int* val)
+{
+    int i;
+
+    *new_index = -EINVAL;
+
+    /*
+     * If the threshold is lesser than the minimum allowed range,
+     * return -ENODATA.
+     */
+    if (threshold < range[0].low_threshold)
+        return -ENODATA;
+
+    /* First try to find the matching index without hysteresis */
+    for (i = 0; i < MAX_RANGES; i++) {
+        if (!range[i].high_threshold && !range[i].low_threshold) {
+            /* First invalid table entry; exit loop */
+            break;
+        }
+
+        if (is_between(range[i].low_threshold,
+                range[i].high_threshold, threshold)) {
+            *new_index = i;
+            *val = range[i].value;
+            break;
+        }
+    }
+
+    /*
+     * If nothing was found, the threshold exceeds the max range for sure
+     * as the other case where it is lesser than the min range is handled
+     * at the very beginning of this function. Therefore, clip it to the
+     * max allowed range value, which is the one corresponding to the last
+     * valid entry in the relation table data array.
+     */
+    if (*new_index == -EINVAL) {
+        if (i == 0) {
+            /* Relation table data array is completely invalid */
+            return -ENODATA;
+        }
+
+        *new_index = (i - 1);
+        *val = range[*new_index].value;
+    }
+
+    /*
+     * If we don't have a current_index return this
+     * newfound value. There is no hysterisis from out of range
+     * to in range transition
+     */
+    if (current_index == -EINVAL)
+        return 0;
+
+    /*
+     * Check for hysteresis if it in the neighbourhood
+     * of our current index.
+     */
+    if (*new_index == current_index + 1) {
+        if (threshold < (range[*new_index].low_threshold + rise_hys)) {
+            /*
+             * Stay in the current index, threshold is not higher
+             * by hysteresis amount
+             */
+            *new_index = current_index;
+            *val = range[current_index].value;
+        }
+    } else if (*new_index == current_index - 1) {
+        if (threshold > range[*new_index].high_threshold - fall_hys) {
+            /*
+             * Stay in the current index, threshold is not lower
+             * by hysteresis amount
+             */
+            *new_index = current_index;
+            *val = range[current_index].value;
+        }
+    }
+
+    return 0;
+}
+
+static int termination_voltage_update(void)
+{
+    int termination_voltage, last_vterm_index;
+    unsigned int charger_state = BATTERY_UNKNOWN;
+    int ret = CHARGER_OK;
+
+    ret = get_charger_state(&g_charger_manager,
+        CHARGER_ALGO_BUCK, &charger_state);
+    if (ret < 0) {
+        chargererr("get charger_state failed\n");
+        return CHARGER_FAILED;
+    } else if (charger_state != BATTERY_CHARGING) {
+        return ret;
+    }
+
+    last_vterm_index = g_charger_manager.desc.temp_vterm.vterm_index;
+    ret = get_val(g_charger_manager.desc.temp_vterm.ranges,
+        g_charger_manager.desc.temp_vterm.rise_hys,
+        g_charger_manager.desc.temp_vterm.fall_hys,
+        g_charger_manager.desc.temp_vterm.vterm_index,
+        g_charger_manager.battery_temp,
+        &g_charger_manager.desc.temp_vterm.vterm_index,
+        &termination_voltage);
+    if (ret < 0) {
+        chargererr("get termination_voltage failed\n");
+        return CHARGER_FAILED;
+    }
+
+    if (g_charger_manager.desc.temp_vterm.vterm_index != last_vterm_index) {
+        ret = set_charger_voltage(&g_charger_manager,
+            CHARGER_ALGO_BUCK, termination_voltage);
+        if (ret < 0) {
+            chargererr("set termination_voltage failed\n");
+            return CHARGER_FAILED;
+        }
+    }
+
+    return ret;
+}
+
 static int healthd_events(int fd)
 {
     int ret;
@@ -159,6 +280,9 @@ static int healthd_events(int fd)
     if (temp != g_charger_manager.battery_temp) {
         g_charger_manager.battery_temp = temp;
         ret = check_temp_event();
+        if (g_charger_manager.desc.temp_vterm.enable) {
+            ret = termination_voltage_update();
+        }
     }
     return ret;
 }
