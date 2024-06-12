@@ -32,6 +32,7 @@
 #define MAX_CHARGERS 2
 #define MAX_PLOTS 5
 #define MAX_BUF_LEN 32
+#define MAX_RANGES 5
 
 /****************************************************************************
  * Public Types
@@ -50,7 +51,7 @@ struct charger_plot_parameter {
     int vol_range_min;
     int vol_range_max;
     int charger_index;
-    int work_current; //mA
+    int work_current; // mA
     int supply_vol;
 };
 
@@ -58,6 +59,20 @@ struct charger_plot {
     struct charger_plot_parameter* tlbs;
     int parameters;
     unsigned int mask;
+};
+
+struct range_data {
+    int low_threshold;
+    int high_threshold;
+    int value;
+};
+
+struct temp_vterm_plot {
+    struct range_data ranges[MAX_RANGES];
+    int rise_hys;
+    int fall_hys;
+    int vterm_index;
+    int enable;
 };
 
 struct charger_desc {
@@ -83,6 +98,7 @@ struct charger_desc {
     struct charger_plot_parameter fault;
     struct battery_default_parameter default_param;
     unsigned int enable_delay_ms;
+    struct temp_vterm_plot temp_vterm;
 };
 
 /****************************************************************************

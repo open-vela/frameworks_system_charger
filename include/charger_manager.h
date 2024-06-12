@@ -53,6 +53,7 @@
 
 #define CHARGER_INDEX_INVAILD -1
 #define CHARGER_FD_INVAILD -1
+#define CHARGER_ALGO_BUCK 0
 #define LOG_TAG "[CHARGERD]"
 #define MQ_MSG_NAME "charger_events"
 #define MQ_MSG_LOAD_MAX (10)
@@ -87,6 +88,12 @@
             return -1;                                                          \
         }                                                                       \
     } while (0)
+
+#define is_between(left, right, value)             \
+    (((left) >= (right) && (left) >= (value)       \
+         && (value) >= (right))                    \
+        || ((left) <= (right) && (left) <= (value) \
+            && (value) <= (right)))
 
 /****************************************************************************
  * Public Types
