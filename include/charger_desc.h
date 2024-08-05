@@ -93,6 +93,10 @@ struct charger_desc {
     int temp_max_r;
     int temp_skin;
     int temp_skin_r;
+    int temp_rise_hys;
+    int temp_fall_hys;
+    int vol_rise_hys;
+    int vol_fall_hys;
     struct charger_plot plot[MAX_PLOTS];
     int plots;
     struct charger_plot_parameter fault;

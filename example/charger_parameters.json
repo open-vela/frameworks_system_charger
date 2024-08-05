@@ -16,6 +16,10 @@
     "temp_max_r" : 440,
     "temp_skin" : 400,
     "temp_skin_r" : 390,
+    "temp_rise_hys" : 10,
+    "temp_fall_hys" : 10,
+    "vol_rise_hys" : 10,
+    "vol_fall_hys" : 10,
     "enable_delay_ms" : 3000,
 
     "battery_default_param" : [
