@@ -158,6 +158,22 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         desc->temp_skin_r = tmp_pointer->valueint;
     }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_rise_hys");
+    if (tmp_pointer) {
+        desc->temp_rise_hys = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_fall_hys");
+    if (tmp_pointer) {
+        desc->temp_fall_hys = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "vol_rise_hys");
+    if (tmp_pointer) {
+        desc->vol_rise_hys = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "vol_fall_hys");
+    if (tmp_pointer) {
+        desc->vol_fall_hys = tmp_pointer->valueint;
+    }
     tmp_pointer = cJSON_GetObjectItem(root, "enable_delay_ms");
     if (tmp_pointer) {
         desc->enable_delay_ms = tmp_pointer->valueint;

@@ -630,6 +630,7 @@ bool is_supply_exist(void)
 
 struct charger_plot_parameter* check_charger_plot(int temp, int vol, int type)
 {
+    static struct charger_plot_parameter* last_pa = NULL;
     struct charger_plot_parameter* pa = NULL;
     struct charger_plot* plot = NULL;
     int i = 0;
@@ -650,6 +651,30 @@ struct charger_plot_parameter* check_charger_plot(int temp, int vol, int type)
         pa = plot->tlbs + i;
         if (temp >= pa->temp_range_min && temp <= pa->temp_range_max
             && vol >= pa->vol_range_min && vol <= pa->vol_range_max) {
+            if (last_pa != NULL && pa != last_pa) {
+                if (pa->temp_range_min != last_pa->temp_range_min && pa->temp_range_max != last_pa->temp_range_max) {
+                    if (pa->temp_range_min > last_pa->temp_range_min) {
+                        if (temp < pa->temp_range_min + g_charger_manager.desc.temp_rise_hys) {
+                            pa = last_pa;
+                        }
+                    } else {
+                        if (temp > pa->temp_range_max - g_charger_manager.desc.temp_fall_hys) {
+                            pa = last_pa;
+                        }
+                    }
+                } else if (pa->vol_range_min != last_pa->vol_range_min && pa->vol_range_max != last_pa->vol_range_max) {
+                    if (pa->vol_range_min > last_pa->vol_range_min) {
+                        if (vol < pa->vol_range_min + g_charger_manager.desc.vol_rise_hys) {
+                            pa = last_pa;
+                        }
+                    } else {
+                        if (vol > pa->vol_range_max - g_charger_manager.desc.vol_fall_hys) {
+                            pa = last_pa;
+                        }
+                    }
+                }
+            }
+            last_pa = pa;
             return pa;
         }
     }
