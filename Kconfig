@@ -57,6 +57,12 @@ config CHARGERD_STACKSIZE
 	int "chargerd stack size"
 	default DEFAULT_TASK_STACKSIZE
 
+config CHARGERD_PM
+	bool "chargerd pm"
+	depends on PM
+	default PM
+	---help---
+		This application is used to chargerd pm
 endif
 
 endmenu # CHARGERD CONFIG
