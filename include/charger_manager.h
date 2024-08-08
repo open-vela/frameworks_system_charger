@@ -43,7 +43,7 @@
 #include <uORB/uORB.h>
 #include <unistd.h>
 
-#ifdef CONFIG_PM
+#ifdef CONFIG_CHARGERD_PM
 #include <nuttx/power/pm.h>
 #endif
 

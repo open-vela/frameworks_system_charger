@@ -25,12 +25,12 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_PM)
+#ifdef CONFIG_CHARGERD_PM
 PM_WAKELOCK_DECLARE_STATIC(g_pm_wakelock_chargerd, "chargerd_wakelock", PM_IDLE_DOMAIN, PM_NORMAL);
 #endif
 
 static bool delay_lock = false;
-#if defined(CONFIG_PM)
+#ifdef CONFIG_CHARGERD_PM
 static bool pm_lock = false;
 #endif
 
@@ -486,7 +486,7 @@ static int charger_state_fault(struct charger_manager* data, charger_msg_t* peve
 
 void charger_wakup(void)
 {
-#if defined(CONFIG_PM)
+#ifdef CONFIG_CHARGERD_PM
     if (pm_lock == false) {
         pm_wakelock_stay(&g_pm_wakelock_chargerd);
         pm_lock = true;
@@ -497,7 +497,7 @@ void charger_wakup(void)
 
 void charger_sleep(void)
 {
-#if defined(CONFIG_PM)
+#ifdef CONFIG_CHARGERD_PM
     if (pm_lock == true) {
         pm_wakelock_relax(&g_pm_wakelock_chargerd);
         pm_lock = false;
