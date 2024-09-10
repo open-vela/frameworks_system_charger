@@ -63,7 +63,7 @@ static bool check_battery_full(struct charger_manager* manager)
     }
 
     chargerdebug("capacity :%d current:%d\n", capacity, current);
-    if (capacity == manager->desc.fullbatt_capacity && current >= 0 && current <= manager->desc.fullbatt_current) {
+    if (capacity >= manager->desc.fullbatt_capacity && current >= 0 && current <= manager->desc.fullbatt_current) {
 
         /*three times of continuous,the condition is satisfying, avoid jitter */
 
