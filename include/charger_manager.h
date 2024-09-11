@@ -39,6 +39,7 @@
 #include <sys/time.h>
 #include <syslog.h>
 #include <system/state.h>
+#include <system/charger_control.h>
 #include <time.h>
 #include <uORB/uORB.h>
 #include <unistd.h>
@@ -111,6 +112,7 @@ typedef enum {
     EVENT_HANDLER_HEALTHD,
     EVENT_HANDLER_THERMAL,
     EVENT_HANDLER_STATE,
+    EVENT_HANDLER_CONTROL,
     EVENT_HANDLER_MAX,
 } event_hanlder_e;
 
@@ -159,6 +161,7 @@ struct charger_manager {
     uint64_t fullbatt_timer_cnt;
     uint64_t fault_timer_cnt;
     int curr_charger;
+    int curr_limit_level;
     int protocol;
     uint32_t print_cycle;
 };
@@ -172,4 +175,5 @@ bool is_supply_exist(void);
 struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type);
 int update_battery_temperature(int temp);
 int send_charger_msg(charger_msg_t msg);
+int check_current_limit_level(int current);
 #endif
