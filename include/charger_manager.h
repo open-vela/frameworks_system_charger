@@ -143,7 +143,7 @@ struct charger_manager {
     charger_state_e prestate;
     charger_state_e currstate;
     charger_state_e nextstate;
-    int online;
+    bool online;
     int supply_fd;
     int adapter_fd;
     int charger_fd[MAX_CHARGERS];
