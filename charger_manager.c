@@ -61,7 +61,7 @@ static struct charger_manager g_charger_manager = {
     .gauge_fd = CHARGER_FD_INVAILD,
     .temp_protect_lock = false,
     .env_timer_id = 0,
-    .online = 0,
+    .online = false,
     .epollfd = CHARGER_FD_INVAILD,
     .curr_charger = CHARGER_INDEX_INVAILD,
 };
@@ -252,8 +252,9 @@ static int termination_voltage_update(void)
 static int healthd_events(int fd)
 {
     int ret;
+    int temp;
     struct battery_state battery_state_get;
-    int online, temp;
+    bool online;
     charger_msg_t msg;
 
     ret = orb_copy(ORB_ID(battery_state), fd, &battery_state_get);
@@ -269,7 +270,7 @@ static int healthd_events(int fd)
         battery_state_get.temp, battery_state_get.curr,
         battery_state_get.voltage);
 
-    online = battery_state_get.state;
+    online = battery_state_get.online;
     if (online != g_charger_manager.online) {
         msg.event = online ? CHARGER_EVENT_PLUGIN : CHARGER_EVENT_PLUGOUT;
         ret = send_charger_msg(msg);
