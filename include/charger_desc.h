@@ -31,6 +31,7 @@
  ****************************************************************************/
 #define MAX_CHARGERS 2
 #define MAX_PLOTS 5
+#define MAX_LEVEL 5
 #define MAX_BUF_LEN 32
 #define MAX_RANGES 5
 
@@ -85,6 +86,7 @@ struct charger_desc {
     unsigned int polling_interval_ms;
     unsigned int fullbatt_capacity;
     int fullbatt_current;
+    int curr_limit_level[MAX_LEVEL];
     unsigned int fullbatt_duration_ms;
     unsigned int fault_duration_ms;
     int temp_min;

@@ -10,6 +10,7 @@
     "fullbatt_current" : 0,
     "fullbatt_duration_ms" : 180000,
     "fault_duration_ms" : 60000,
+    "curr_limit_level" : [60,50,40,30,20],
     "temp_min" : 10,
     "temp_min_r" : 20,
     "temp_max" : 450,

@@ -129,7 +129,8 @@ static int buck_algo_update(struct charger_algo* algo, struct charger_plot_param
             pa->vol_range_min, pa->vol_range_max, pa->charger_index,
             pa->work_current, pa->supply_vol);
 
-        ret = set_charger_current(algo->cm, pa->charger_index, pa->work_current);
+        ret = check_current_limit_level(pa->work_current);
+        ret = set_charger_current(algo->cm, pa->charger_index, ret);
         if (ret < 0) {
             chargererr("enable charger %d failed\n", algo->index);
             return CHARGER_FAILED;
@@ -248,7 +249,8 @@ static int pump_algo_update(struct charger_algo* algo, struct charger_plot_param
                 pa->work_current, pa->supply_vol);
 
             memcpy(&algo->sp, pa, sizeof(struct charger_plot_parameter));
-            return set_charger_current(algo->cm, algo->index, pa->work_current);
+            ret = check_current_limit_level(pa->work_current);
+            return set_charger_current(algo->cm, algo->index, ret);
         } else {
             ret = get_battery_current(algo->cm, &current);
             chargerassert_return(ret < 0, "pump_algo_update get battery current failed\n");

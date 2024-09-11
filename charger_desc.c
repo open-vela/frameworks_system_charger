@@ -126,6 +126,14 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         desc->fullbatt_current = tmp_pointer->valueint;
     }
+    tmp_pointer = cJSON_GetObjectItem(root, "curr_limit_level");
+    if (tmp_pointer && cJSON_IsArray(tmp_pointer)) {
+        cJSON *level;
+        int i = 0;
+        cJSON_ArrayForEach(level, tmp_pointer) {
+            desc->curr_limit_level[i++] = level->valueint;
+        }
+    }
     tmp_pointer = cJSON_GetObjectItem(root, "fullbatt_duration_ms");
     if (tmp_pointer) {
         desc->fullbatt_duration_ms = tmp_pointer->valueint;

@@ -226,6 +226,7 @@ static void charger_chg_proc_algostop(struct charger_manager* data)
         ret = algo->ops->stop(algo);
         chargerassert_noreturn(ret < 0, "algo %d stop failed\n", algo->index);
         data->curr_charger = CHARGER_INDEX_INVAILD;
+        data->curr_limit_level = -1;
     }
     return;
 }

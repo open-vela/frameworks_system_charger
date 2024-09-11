@@ -45,6 +45,7 @@ struct event_handler {
 static int healthd_events(int fd);
 static int thermal_events(int fd);
 static int state_events(int fd);
+static int control_events(int fd);
 static int charger_dev_init(void);
 static void charger_dev_unit(void);
 static int charger_event_engine_init(void);
@@ -64,12 +65,14 @@ static struct charger_manager g_charger_manager = {
     .online = false,
     .epollfd = CHARGER_FD_INVAILD,
     .curr_charger = CHARGER_INDEX_INVAILD,
+    .curr_limit_level = -1,
 };
 
 static struct event_handler handlers[EVENT_HANDLER_MAX] = {
     { .fd = CHARGER_FD_INVAILD, .callback = healthd_events },
     { .fd = CHARGER_FD_INVAILD, .callback = thermal_events },
     { .fd = CHARGER_FD_INVAILD, .callback = state_events },
+    { .fd = CHARGER_FD_INVAILD, .callback = control_events },
 };
 
 /****************************************************************************
@@ -326,6 +329,43 @@ static int state_events(int fd)
     return 0;
 }
 
+static int control_events(int fd)
+{
+    struct charger_control control;
+    struct charger_algo *algo;
+    int request;
+    int ret;
+
+    ret = orb_copy(ORB_ID(charger_control), fd, &control);
+    if (ret != OK) {
+        chargererr("charger control orb copy failed\n");
+        return CHARGER_FAILED;
+    }
+
+    if (!g_charger_manager.online ||
+        g_charger_manager.curr_charger == CHARGER_INDEX_INVAILD ||
+        control.curr_limit_level >= MAX_LEVEL) {
+        chargererr("charger control failed, becase charger is offline or invalid paramenter\n");
+        return CHARGER_FAILED;
+    }
+
+    if (control.curr_limit_level == g_charger_manager.curr_limit_level)
+        return CHARGER_OK;
+
+    g_charger_manager.curr_limit_level = control.curr_limit_level;
+
+    algo = &g_charger_manager.algos[g_charger_manager.curr_charger];
+    request = check_current_limit_level(algo->sp.work_current);
+    ret = set_charger_current(algo->cm, algo->sp.charger_index, request);
+    if (ret < 0) {
+        chargererr("set charger current %d failed\n", ret);
+        return CHARGER_FAILED;
+    }
+
+    chargerinfo("control event curr:%d[%d]\n", request, algo->sp.work_current);
+    return ret;
+}
+
 static int register_event_handler(int fd, struct event_handler* handler)
 {
     struct epoll_event ev;
@@ -385,6 +425,19 @@ static int register_state_events(void)
     return register_event_handler(recive_mq, &handlers[EVENT_HANDLER_STATE]);
 }
 
+static int register_control_events(void)
+{
+    int uorb_fd;
+
+    uorb_fd = orb_subscribe(ORB_ID(charger_control));
+    if (uorb_fd < 0) {
+        chargererr("Uorb subscrib  failed: %d\n", uorb_fd);
+        return CHARGER_FAILED;
+    }
+
+    return register_event_handler(uorb_fd, &handlers[EVENT_HANDLER_CONTROL]);
+}
+
 static int charger_event_engine_init(void)
 {
     int epollfd;
@@ -399,6 +452,7 @@ static int charger_event_engine_init(void)
     ret = register_healthd_events();
     ret |= register_thermal_events();
     ret |= register_state_events();
+    ret |= register_control_events();
 
     if (ret < 0) {
         charger_event_engine_unit();
@@ -647,6 +701,20 @@ bool is_supply_exist(void)
         return false;
     }
     return true;
+}
+
+int check_current_limit_level(int current)
+{
+    int request;
+
+    if (g_charger_manager.curr_limit_level <= -1) {
+        return current;
+    }
+    request = g_charger_manager.desc.curr_limit_level[g_charger_manager.curr_limit_level];
+    if (request < current) {
+        return request;
+    }
+    return current;
 }
 
 struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type)
