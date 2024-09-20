@@ -151,21 +151,24 @@ static int buck_algo_update(struct charger_algo* algo, struct charger_plot_param
 
 static int buck_algo_stop(struct charger_algo* algo)
 {
+    struct charger_manager* manager = algo->cm;
     int ret;
 
     chargerinfo("buck algo stop\n");
-    ret = enable_charger(algo->cm, algo->index, false);
+    ret = enable_charger(manager, algo->index, false);
     if (ret < 0) {
         chargererr("disable charger %d failed\n", algo->index);
         return CHARGER_FAILED;
     }
 
 #ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
-    set_battery_charge_state(algo->cm, BATTERY_IDLE);
+    if (manager->nextstate != CHARGER_STATE_FULL) {
+        set_battery_charge_state(manager, BATTERY_IDLE);
+    }
 #endif
 
     if (is_supply_exist()) {
-        ret = set_supply_voltage(algo->cm, BUCK_ALGO_INIT_VOL);
+        ret = set_supply_voltage(manager, BUCK_ALGO_INIT_VOL);
         if (ret < 0) {
             chargererr("set supply %d failed\n", BUCK_ALGO_INIT_VOL);
             return CHARGER_FAILED;
