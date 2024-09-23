@@ -161,12 +161,6 @@ static int buck_algo_stop(struct charger_algo* algo)
         return CHARGER_FAILED;
     }
 
-#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
-    if (manager->nextstate != CHARGER_STATE_FULL) {
-        set_battery_charge_state(manager, BATTERY_IDLE);
-    }
-#endif
-
     if (is_supply_exist()) {
         ret = set_supply_voltage(manager, BUCK_ALGO_INIT_VOL);
         if (ret < 0) {
@@ -295,10 +289,6 @@ static int pump_algo_stop(struct charger_algo* algo)
         chargererr("disable charger %d failed\n", algo->index);
         return CHARGER_FAILED;
     }
-
-#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
-    set_battery_charge_state(algo->cm, BATTERY_IDLE);
-#endif
 
     if (is_supply_exist()) {
         ret = set_supply_voltage(algo->cm, PUMP_CONF_STARTUP_VOLTAGE);
