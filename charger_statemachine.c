@@ -151,9 +151,6 @@ static int charger_state_init(struct charger_manager* data, charger_msg_t* peven
             return CHARGER_FAILED;
         }
         set_battery_vbus_state(data, true);
-#ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
-        set_battery_charge_state(data, BATTERY_IDLE);
-#endif
         charger_wakup();
         ret = update_charger_protocol(data);
         if (data->temp_protect_lock) {
