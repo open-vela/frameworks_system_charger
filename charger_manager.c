@@ -80,18 +80,20 @@ static int check_temp_event(void)
 {
     bool bot = false;
     bool sot = false;
-    int tmin, tmax, stemp;
+    int tmin, tmax, smin, smax;
     charger_msg_t msg;
     int ret = 0;
 
     if (g_charger_manager.temp_protect_lock) {
         tmin = g_charger_manager.desc.temp_min_r;
         tmax = g_charger_manager.desc.temp_max_r;
-        stemp = g_charger_manager.desc.temp_skin_r;
+        smin = g_charger_manager.desc.temp_skin_min_r;
+        smax = g_charger_manager.desc.temp_skin_max_r;
     } else {
         tmin = g_charger_manager.desc.temp_min;
         tmax = g_charger_manager.desc.temp_max;
-        stemp = g_charger_manager.desc.temp_skin;
+        smin = g_charger_manager.desc.temp_skin_min;
+        smax = g_charger_manager.desc.temp_skin_max;
     }
 
     chargerinfo("battery tempture:%d skin tempture:%d\n",
@@ -101,7 +103,7 @@ static int check_temp_event(void)
         bot = true;
     }
 
-    if (g_charger_manager.skin_temp >= stemp) {
+    if (g_charger_manager.skin_temp >= smax || g_charger_manager.skin_temp <= smin) {
         sot = true;
     }
 
