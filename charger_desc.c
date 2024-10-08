@@ -150,13 +150,21 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         desc->temp_max_r = tmp_pointer->valueint;
     }
-    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin");
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_min");
     if (tmp_pointer) {
-        desc->temp_skin = tmp_pointer->valueint;
+        desc->temp_skin_min = tmp_pointer->valueint;
     }
-    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_r");
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_min_r");
     if (tmp_pointer) {
-        desc->temp_skin_r = tmp_pointer->valueint;
+        desc->temp_skin_min_r = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_max");
+    if (tmp_pointer) {
+        desc->temp_skin_max = tmp_pointer->valueint;
+    }
+    tmp_pointer = cJSON_GetObjectItem(root, "temp_skin_max_r");
+    if (tmp_pointer) {
+        desc->temp_skin_max_r = tmp_pointer->valueint;
     }
     tmp_pointer = cJSON_GetObjectItem(root, "temp_rise_hys");
     if (tmp_pointer) {

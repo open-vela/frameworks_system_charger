@@ -91,8 +91,10 @@ struct charger_desc {
     int temp_min_r;
     int temp_max;
     int temp_max_r;
-    int temp_skin;
-    int temp_skin_r;
+    int temp_skin_min;
+    int temp_skin_min_r;
+    int temp_skin_max;
+    int temp_skin_max_r;
     int temp_rise_hys;
     int temp_fall_hys;
     int vol_rise_hys;
