@@ -203,6 +203,9 @@ static int charger_state_temp_protect(struct charger_manager* data, charger_msg_
         ret = update_battery_temperature(temp);
         chargerassert_return(ret < 0, "update battery temperature failed\n");
         break;
+    case CHARGER_EVENT_PLUGOUT:
+        data->nextstate = CHARGER_STATE_INIT;
+        break;
     default:
         chargerdebug("CHARGER_STATE_TEMP_PROTECT ignore %d\n", pevent->event);
     }
