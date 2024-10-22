@@ -16,7 +16,7 @@
 
 include $(APPDIR)/Make.defs
 
-CFLAGS += ${INCDIR_PREFIX} $(APPDIR)/frameworks/charger/include
+CFLAGS += ${INCDIR_PREFIX} $(APPDIR)/frameworks/system/charger/include
 CFLAGS += ${INCDIR_PREFIX} $(APPDIR)/netutils/cjson/cJSON
 
 PROGNAME = $(CONFIG_CHARGERD_PROGNAME)
