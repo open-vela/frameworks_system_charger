@@ -15,5 +15,5 @@
 #
 
 ifeq ($(CONFIG_CHARGERD),y)
-CONFIGURED_APPS += frameworks/charger
+CONFIGURED_APPS += frameworks/system/charger
 endif
