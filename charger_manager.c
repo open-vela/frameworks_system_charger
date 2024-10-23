@@ -332,8 +332,8 @@ static int state_events(int fd)
 static int control_events(int fd)
 {
     struct charger_control control;
-    struct charger_algo *algo;
-    int request;
+    struct charger_algo* algo;
+    int request = -1;
     int ret;
 
     ret = orb_copy(ORB_ID(charger_control), fd, &control);
@@ -342,9 +342,9 @@ static int control_events(int fd)
         return CHARGER_FAILED;
     }
 
-    if (!g_charger_manager.online ||
-        g_charger_manager.curr_charger == CHARGER_INDEX_INVAILD ||
-        control.curr_limit_level >= MAX_LEVEL) {
+    chargerinfo("control event limit level:%" PRIi32 "\n", control.curr_limit_level);
+
+    if (!g_charger_manager.online || g_charger_manager.curr_charger == CHARGER_INDEX_INVAILD || control.curr_limit_level >= MAX_LEVEL) {
         chargererr("charger control failed, becase charger is offline or invalid paramenter\n");
         return CHARGER_FAILED;
     }
@@ -355,14 +355,17 @@ static int control_events(int fd)
     g_charger_manager.curr_limit_level = control.curr_limit_level;
 
     algo = &g_charger_manager.algos[g_charger_manager.curr_charger];
-    request = check_current_limit_level(algo->sp.work_current);
-    ret = set_charger_current(algo->cm, algo->sp.charger_index, request);
-    if (ret < 0) {
-        chargererr("set charger current %d failed\n", ret);
-        return CHARGER_FAILED;
+    if (algo->sp.charger_index != -1) {
+        request = check_current_limit_level(algo->sp.work_current);
+        ret = set_charger_current(algo->cm, algo->sp.charger_index, request);
+        if (ret < 0) {
+            chargererr("set charger current %d failed\n", ret);
+            return CHARGER_FAILED;
+        }
     }
 
-    chargerinfo("control event curr:%d[%d]\n", request, algo->sp.work_current);
+    chargerinfo("control event curr:%d[%d], charger index:%d\n",
+        request, algo->sp.work_current, algo->sp.charger_index);
     return ret;
 }
 
