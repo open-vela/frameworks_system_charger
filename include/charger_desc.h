@@ -84,6 +84,7 @@ struct charger_desc {
     int chargers;
     char fuel_gauge[MAX_BUF_LEN];
     unsigned int polling_interval_ms;
+    unsigned int startchg_capacity;
     unsigned int fullbatt_capacity;
     int fullbatt_current;
     int curr_limit_level[MAX_LEVEL];

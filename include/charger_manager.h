@@ -155,6 +155,7 @@ struct charger_manager {
     int skin_temp;
     int battery_temp;
     bool temp_protect_lock;
+    bool capacity_lock;
     timer_t env_timer_id;
     state_func_t functables[CHARGER_STATE_MAX];
     int epollfd;
