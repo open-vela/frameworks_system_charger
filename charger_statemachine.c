@@ -48,6 +48,35 @@ static int charger_timer_cb(void)
     return 0;
 }
 
+static bool stop_charger_by_capacity(struct charger_manager* manager)
+{
+    int capacity;
+    int ret;
+
+    if (manager->desc.startchg_capacity == 0) {
+        return false;
+    }
+
+    ret = get_battery_capacity(manager, &capacity);
+    if (ret < 0) {
+        chargererr("can not get battery capacity\n");
+        return true;
+    }
+
+    if (capacity >= manager->desc.fullbatt_capacity) {
+        manager->capacity_lock = false;
+        return true;
+    } else if (capacity < manager->desc.startchg_capacity) {
+        manager->capacity_lock = true;
+        return false;
+    } else if (manager->curr_charger != CHARGER_INDEX_INVAILD &&
+               manager->capacity_lock) {
+        return false;
+    }
+
+    return true;
+}
+
 static bool check_battery_full(struct charger_manager* manager)
 {
     int capacity;
@@ -227,6 +256,7 @@ static void charger_chg_proc_algostop(struct charger_manager* data)
         chargerassert_noreturn(ret < 0, "algo %d stop failed\n", algo->index);
         data->curr_charger = CHARGER_INDEX_INVAILD;
         data->curr_limit_level = -1;
+        data->capacity_lock = false;
     }
     return;
 }
@@ -303,7 +333,7 @@ static int charger_chg_proc(struct charger_manager* data)
     int current = 0;
     struct charger_plot_parameter* pa = NULL;
 
-    if (check_battery_full(data)) {
+    if (stop_charger_by_capacity(data) || check_battery_full(data)) {
         charger_chg_proc_algostop(data);
         data->nextstate = CHARGER_STATE_FULL;
         return CHARGER_OK;

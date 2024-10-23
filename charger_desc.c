@@ -118,6 +118,10 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         desc->polling_interval_ms = tmp_pointer->valueint;
     }
+    tmp_pointer = cJSON_GetObjectItem(root, "startchg_capacity");
+    if (tmp_pointer) {
+        desc->startchg_capacity = tmp_pointer->valueint;
+    }
     tmp_pointer = cJSON_GetObjectItem(root, "fullbatt_capacity");
     if (tmp_pointer) {
         desc->fullbatt_capacity = tmp_pointer->valueint;

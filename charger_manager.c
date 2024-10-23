@@ -61,6 +61,7 @@ static struct charger_manager g_charger_manager = {
     .charger_fd = { CHARGER_FD_INVAILD },
     .gauge_fd = CHARGER_FD_INVAILD,
     .temp_protect_lock = false,
+    .capacity_lock = false,
     .env_timer_id = 0,
     .online = false,
     .epollfd = CHARGER_FD_INVAILD,

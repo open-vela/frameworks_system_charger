@@ -6,6 +6,7 @@
     "algo" : "buck;pump",
 
     "polling_interval_ms" : 1000,
+    "startchg_capacity" : 0,
     "fullbatt_capacity" : 100,
     "fullbatt_current" : 0,
     "fullbatt_duration_ms" : 180000,
