@@ -138,37 +138,41 @@ static int get_val(struct range_data* range, int rise_hys, int fall_hys,
     *new_index = -EINVAL;
 
     /*
-     * If the threshold is lesser than the minimum allowed range,
-     * return -ENODATA.
+     * Return -ENODATA if the threshold is below the lowest range value.
      */
-    if (threshold < range[0].low_threshold)
+
+    if (range[0].low_threshold > threshold)
         return -ENODATA;
 
-    /* First try to find the matching index without hysteresis */
+    /* Attempt to locate the matching index without hysteresis */
+
     for (i = 0; i < MAX_RANGES; i++) {
-        if (!range[i].high_threshold && !range[i].low_threshold) {
-            /* First invalid table entry; exit loop */
+        if (!range[i].low_threshold && !range[i].high_threshold) {
+
+            /* Exit loop if the table entry is invalid */
+
             break;
         }
 
         if (is_between(range[i].low_threshold,
                 range[i].high_threshold, threshold)) {
-            *new_index = i;
             *val = range[i].value;
+            *new_index = i;
             break;
         }
     }
 
     /*
-     * If nothing was found, the threshold exceeds the max range for sure
-     * as the other case where it is lesser than the min range is handled
-     * at the very beginning of this function. Therefore, clip it to the
-     * max allowed range value, which is the one corresponding to the last
-     * valid entry in the relation table data array.
+     * If no match is found, the threshold exceeds the maximum range
+     * (minimum range case was handled at the start). Clip to the maximum
+     * allowed range, corresponding to the last valid entry in the array.
      */
-    if (*new_index == -EINVAL) {
-        if (i == 0) {
-            /* Relation table data array is completely invalid */
+
+    if (-EINVAL == *new_index) {
+        if (0 == i) {
+
+            /* Entire array contains invalid data */
+
             return -ENODATA;
         }
 
@@ -177,34 +181,38 @@ static int get_val(struct range_data* range, int rise_hys, int fall_hys,
     }
 
     /*
-     * If we don't have a current_index return this
-     * newfound value. There is no hysterisis from out of range
-     * to in range transition
+     * If there's no current index, return the new value found
+     * since no hysteresis is applied for out-of-range transitions.
      */
-    if (current_index == -EINVAL)
+
+    if (-EINVAL == current_index)
         return 0;
 
     /*
-     * Check for hysteresis if it in the neighbourhood
-     * of our current index.
+     * Apply hysteresis if near the current index.
      */
-    if (*new_index == current_index + 1) {
-        if (threshold < (range[*new_index].low_threshold + rise_hys)) {
+
+    if (current_index + 1 == *new_index) {
+        if (threshold < (rise_hys + range[*new_index].low_threshold)) {
+
             /*
-             * Stay in the current index, threshold is not higher
-             * by hysteresis amount
+             * Remain at the current index as the threshold
+             * is within the hysteresis range.
              */
-            *new_index = current_index;
+
             *val = range[current_index].value;
+            *new_index = current_index;
         }
-    } else if (*new_index == current_index - 1) {
-        if (threshold > range[*new_index].high_threshold - fall_hys) {
+    } else if (current_index - 1 == *new_index) {
+        if (range[*new_index].high_threshold - fall_hys < threshold) {
+
             /*
-             * Stay in the current index, threshold is not lower
-             * by hysteresis amount
+             * Remain at the current index as the threshold
+             * does not fall below the hysteresis range.
              */
-            *new_index = current_index;
+
             *val = range[current_index].value;
+            *new_index = current_index;
         }
     }
 
