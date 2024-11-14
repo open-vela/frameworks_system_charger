@@ -1,4 +1,7 @@
 # Overview of chargerd
+
+\[ English | [简体中文](README_zh-cn.md) \]
+
 Charging management is mainly used for monitoring and managing the battery charging process, ensuring safe and fast charging of the battery. Currently, many IoT products come with batteries, and the charging circuits and chips have a certain degree of reusability. Therefore, implementing a universal charging management framework that integrates the characteristics of different charging circuits and chips enhances software reusability and maintainability.
 
 ## Configuration Application of chargerd
