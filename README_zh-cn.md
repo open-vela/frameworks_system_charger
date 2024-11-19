@@ -2,30 +2,35 @@
 
 \[ [English](README.md) | 简体中文 \]
 
-充电管理主要用来对电池充电过程的监控和管理，保障电池安全快速的充电。目前很多IoT产品都带有电池，并且充电电路和芯片具有一定的复用性，所以实现一个通用充电管理框架，将不同充电电路和芯片特性进行融合，增强软件复用性和可维护。
+充电管理主要用来对电池充电过程的监控和管理，保障电池安全快速的充电。目前很多 `IoT` 产品都带有电池，并且充电电路和芯片具有一定的复用性，所以实现一个通用充电管理框架，将不同充电电路和芯片特性进行融合，增强软件复用性和可维护。
 
-## chargerd配置应用
-NuttX中chargerd应用需要做如下配置。
-### chargerd配置
-使能chargerd服务，需要打开如下配置：
+## chargerd 配置应用
+`NuttX` 中 `chargerd` 应用需要做如下配置。
+
+### chargerd 配置
+使能 chargerd 服务，需要打开如下配置：
+
 ```shell
 # 使能chargerd服务
 CONFIG_CHARGERD=y
+
 # 如果从电量计获取的电池数据需要b16转换，则打开该配置
 CONFIG_CHARGERD_HWINTF_CONVERSION=y
+
 # chargerd配置文件默认路径, 如有改变，填写正确值
 CONFIG_CHARGERD_CONFIGURATION_FILE_PATH=/etc/chargerd_parameters.json
 ```
 
-### chargerd启动
-在启动脚本rcS中添加chargerd服务的启动流程，如下：
+### chargerd 启动
+在启动脚本 `rcS` 中添加 `chargerd` 服务的启动流程，如下：
+
 ```shell
 #ifdef CONFIG_CHARGERD
 chargerd &
 #endif
 ```
 
-### chargerd打包
+### chargerd 打包
 在romfs打包脚本中加入chargerd的配置文件
 ```shell
 ifeq ($(CONFIG_CHARGERD),y)
@@ -33,10 +38,10 @@ RCRAWS += etc/charger_parameters.json
 endif
 ```
 
-## chargerd配置文件
-chargerd配置文件为json格式，chargerd启动时会读取chargerd配置文件，并根据配置文件的配置，初始化chargerd服务。
+## chargerd 配置文件
+chargerd 配置文件为 json 格式，chargerd 启动时会读取 chargerd 配置文件，并根据配置文件的配置，初始化chargerd 服务。
 
-### chargerd配置文件参数
+### chargerd 配置文件参数
 | 参数名 | 参数格式 | 备注说明 |
 | --- | --- | --- |
 | charger_supply | 参数值 | 调节charger芯片供电电压设备节点 |
@@ -65,7 +70,7 @@ chargerd配置文件为json格式，chargerd启动时会读取chargerd配置文�
 | 充电曲线表 | 充电曲线表，参见模版 | 1. name：表示充电曲线表的名字；2. mask：表示支持的以1为基准的左移运算得到的值，例如1 << 3，则mask为8，表示充电protocol，对应内核数据结构battery_protocol_e; 3. element_num：表示该充电曲线表的元素数量。4. your_plot_name_xxx：自定义命名的充电曲线表的名字，需要注意的是，需要与上述name之后填充的name参数一致。5. 曲线表元素：都放在中括号之后，例如[-500,0,0,65535,-1,0,0]，当有多个元素时，类似的写多行。 |
 | temperature_termination_voltage_table | 根据温度动态调整电压表 | 截止电压值根据温度动态调整的表：1. temp_vterm_enable：是否使能该功能；2. temp_rise_hys：温度上升迟滞值；3. temp_fall_hys：温度下降迟滞值；4. relation_table：温度范围与截止电压对应关系，比如 [-100,0,3000]，表示当温度在-10℃ ~ 0℃范围内，截止电压设置为3000mV。 |
 
-### chargerd配置文件示例
+### chargerd 配置文件示例
 charged配置案例：
 ```json
 {

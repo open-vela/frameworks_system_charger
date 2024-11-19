@@ -9,11 +9,14 @@ The chargerd application in NuttX requires the following configuration.
 
 ### Configuration for chargerd
 To enable the chargerd service, the following configurations need to be set:
+
 ```shell
 # Enable the chargerd service
 CONFIG_CHARGERD=y
+
 # If battery data from the fuel gauge requires b16 conversion, enable this configuration
 CONFIG_CHARGERD_HWINTF_CONVERSION=y
+
 # Default path for the chargerd configuration file, fill in the correct value if changed
 CONFIG_CHARGERD_CONFIGURATION_FILE_PATH=/etc/chargerd_parameters.json
 ```
