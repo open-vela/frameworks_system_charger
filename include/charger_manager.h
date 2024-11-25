@@ -173,7 +173,8 @@ struct charger_manager {
 
 bool is_adapter_exist(void);
 bool is_supply_exist(void);
-struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type);
+struct charger_plot_parameter*
+check_charger_plot(int temp, int vol, int current, int type, int cycle);
 int update_battery_temperature(int temp);
 int send_charger_msg(charger_msg_t msg);
 int check_current_limit_level(int current);

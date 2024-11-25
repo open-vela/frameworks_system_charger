@@ -687,6 +687,17 @@ static void charger_event_engine_start(void)
     }
 }
 
+static bool charger_check_cycle_valid(int cycle, struct charger_plot *plot)
+{
+  if (cycle < 0 || (plot->cycle_min == 0 && plot->cycle_max == 0))
+      return true;
+
+  if (cycle >= plot->cycle_min && cycle <= plot->cycle_max)
+      return true;
+
+  return false;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -721,7 +732,8 @@ int check_current_limit_level(int current)
     return current;
 }
 
-struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type)
+
+struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type, int cycle)
 {
     static struct charger_plot_parameter* last_pa = NULL;
     struct charger_plot_parameter* pa = NULL;
@@ -731,12 +743,12 @@ struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current
     if ((current > 0) && (g_charger_manager.desc.back_end_imp > 0)) {
         g_charger_manager.desc.vol_rise_hys = current * g_charger_manager.desc.back_end_imp / 1000;
     }
-    chargerdebug("temp:%d vol:%d type:%d, current:%d, vol_rise_hys:%d\n",
-                temp, vol, type, current, g_charger_manager.desc.vol_rise_hys);
+    chargerdebug("temp:%d vol:%d type:%d, current:%d, vol_rise_hys:%d, cycle:%d\n",
+                temp, vol, type, current, g_charger_manager.desc.vol_rise_hys, cycle);
 
     for (i = 0; i < g_charger_manager.desc.plots; i++) {
         plot = &g_charger_manager.desc.plot[i];
-        if (plot->mask & (1 << type)) {
+        if ((plot->mask & (1 << type)) && charger_check_cycle_valid(cycle, plot)) {
             break;
         }
     }

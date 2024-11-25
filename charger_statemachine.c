@@ -331,6 +331,8 @@ static int charger_chg_proc(struct charger_manager* data)
     int temp = 0;
     int vol = 0;
     int current = 0;
+    int cycle = -1;
+
     struct charger_plot_parameter* pa = NULL;
 
     if (stop_charger_by_capacity(data) || check_battery_full(data)) {
@@ -364,7 +366,9 @@ static int charger_chg_proc(struct charger_manager* data)
         goto fault;
     }
 
-    pa = check_charger_plot(temp, vol, current, data->protocol);
+    get_battery_cycle_count(data, &cycle);
+
+    pa = check_charger_plot(temp, vol, current, data->protocol, cycle);
     if (NULL == pa) {
         chargerwarn("temp:%d vol:%d were not found in the plot\n",
             temp, vol);

@@ -52,6 +52,8 @@
         {
             "name" : "g_charger_plot_table",
             "mask" : 8,
+            "cycle_min" : 0,
+            "cycle_max" : 0,
             "element_num" : 15,
             "g_charger_plot_table" : [
                 [-500,0,0,65535,-1,0,0],
@@ -74,6 +76,8 @@
         {
             "name" : "g_charger_plot_table_noStand_type3",
             "mask" : 4,
+            "cycle_min" : 0,
+            "cycle_max" : 0,
             "element_num" : 9,
             "g_charger_plot_table_noStand_type3" : [
                 [-500,0,0,65535,-1,0,0],
@@ -90,6 +94,8 @@
         {
             "name" : "g_charger_plot_table_noStand",
             "mask" : 3,
+            "cycle_min" : 0,
+            "cycle_max" : 0,
             "element_num" : 4,
             "g_charger_plot_table_noStand" : [
                 [-500,0,0,65535,-1,0,0],
