@@ -30,7 +30,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 #define MAX_CHARGERS 2
-#define MAX_PLOTS 5
+#define MAX_PLOTS 10
 #define MAX_LEVEL 5
 #define MAX_BUF_LEN 32
 #define MAX_RANGES 5
@@ -60,6 +60,8 @@ struct charger_plot {
     struct charger_plot_parameter* tlbs;
     int parameters;
     unsigned int mask;
+    int cycle_min;
+    int cycle_max;
 };
 
 struct range_data {

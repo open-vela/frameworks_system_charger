@@ -654,3 +654,34 @@ int set_battery_charge_state(struct charger_manager* manager, unsigned int state
     return ret;
 }
 #endif
+
+/****************************************************************************
+ * Name: get_battery_cycle_count
+ *
+ * Description:
+ *   get charge cycle count.
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   count - the pointer to save cycle count
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int get_battery_cycle_count(struct charger_manager* manager, int *count)
+{
+    struct batio_operate_msg_s msg;
+    int ret;
+
+    msg.operate_type = BATIO_OPRTN_CYCLE_COUNT;
+
+    ret = ioctl(manager->gauge_fd, BATIOC_OPERATE, (unsigned long)((uintptr_t)&msg));
+    if (ret < 0) {
+        ret = -errno;
+    } else {
+        *count = msg.u32;
+    }
+
+    return ret;
+}

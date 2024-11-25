@@ -305,6 +305,14 @@ static int parse_charger_desc_config(struct charger_desc* desc)
                     desc->plot[desc->plots].tlbs = tlbs;
                     desc->plot[desc->plots].parameters = element_num;
                     desc->plot[desc->plots].mask = cJSON_GetObjectItem(charger_plot_table_index, "mask")->valueint;
+                    tmp_pointer = cJSON_GetObjectItem(charger_plot_table_index, "cycle_min");
+                    if (tmp_pointer) {
+                        desc->plot[desc->plots].cycle_min = tmp_pointer->valueint;
+                    }
+                    tmp_pointer = cJSON_GetObjectItem(charger_plot_table_index, "cycle_max");
+                    if (tmp_pointer) {
+                        desc->plot[desc->plots].cycle_max = tmp_pointer->valueint;
+                    }
                     desc->plots++;
                 } else {
                     chargererr("The charging curve table named %s was not found.\n", name_ptr->valuestring);
