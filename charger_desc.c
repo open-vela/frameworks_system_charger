@@ -182,6 +182,10 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     if (tmp_pointer) {
         desc->vol_fall_hys = tmp_pointer->valueint;
     }
+    tmp_pointer = cJSON_GetObjectItem(root, "back_end_imp");
+    if (tmp_pointer) {
+        desc->back_end_imp = tmp_pointer->valueint;
+    }
     tmp_pointer = cJSON_GetObjectItem(root, "enable_delay_ms");
     if (tmp_pointer) {
         desc->enable_delay_ms = tmp_pointer->valueint;
