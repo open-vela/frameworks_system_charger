@@ -22,6 +22,7 @@
     "temp_fall_hys" : 10,
     "vol_rise_hys" : 10,
     "vol_fall_hys" : 10,
+    "back_end_imp" : 110,
     "enable_delay_ms" : 3000,
 
     "battery_default_param" : [

@@ -299,6 +299,7 @@ static int charger_chg_proc(struct charger_manager* data)
 {
     int temp = 0;
     int vol = 0;
+    int current = 0;
     struct charger_plot_parameter* pa = NULL;
 
     if (check_battery_full(data)) {
@@ -327,7 +328,12 @@ static int charger_chg_proc(struct charger_manager* data)
         goto fault;
     }
 
-    pa = check_charger_plot(temp, vol, data->protocol);
+    if (get_battery_current(data, &current) < 0) {
+        chargererr("get battery current failed\n");
+        goto fault;
+    }
+
+    pa = check_charger_plot(temp, vol, current, data->protocol);
     if (NULL == pa) {
         chargerwarn("temp:%d vol:%d were not found in the plot\n",
             temp, vol);
