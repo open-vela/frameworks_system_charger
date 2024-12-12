@@ -26,12 +26,6 @@ config CHARGERD
 
 if CHARGERD
 
-config CHARGERD_HWINTF_CONVERSION
-	bool "hwintf conversion"
-	default n
-	---help---
-		This application is used to battery data conversion
-
 config CHARGERD_SYNC_CHARGE_STATE
 	bool "sync charge state to gauge"
 	default n
