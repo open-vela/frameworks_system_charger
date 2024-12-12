@@ -333,7 +333,7 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
 {
     int ret;
     bool gauge_inited;
-    b16_t vol = 0;
+    int vol = 0;
 
     if (voltage == NULL) {
         chargererr("Error: voltage is invaild\n");
@@ -352,12 +352,7 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
             chargererr("ERROR: ioctl(BATIOC_VOLTAGE) failed: %d\n", errno);
             goto battery_default;
         }
-
-#ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
-        *voltage = b16tof(vol) * 1000;
-#else
         *voltage = vol;
-#endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
         goto battery_default;
@@ -388,7 +383,7 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
 {
     int ret = 0;
     bool gauge_inited;
-    b16_t cap = 0;
+    int cap = 0;
 
     if (capacity == NULL) {
         chargererr("Error: capacity is invaild\n");
@@ -407,12 +402,7 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
             chargererr("ERROR: ioctl(BATIOC_CAPACITY) failed: %d\n", errno);
             goto battery_default;
         }
-
-#ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
-        *capacity = b16toi(cap);
-#else
         *capacity = cap;
-#endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
         goto battery_default;
@@ -443,7 +433,7 @@ int get_battery_temp(struct charger_manager* manager, int* val)
 {
     int ret = 0;
     bool gauge_inited;
-    b8_t temp = 0;
+    int temp = 0;
 
     if (val == NULL) {
         chargererr("Error: val is invaild\n");
@@ -462,12 +452,7 @@ int get_battery_temp(struct charger_manager* manager, int* val)
             chargererr("ERROR: ioctl(BATIOC_TEMPERATURE) failed: %d\n", errno);
             goto battery_default;
         }
-
-#ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
-        *val = b8tof(temp) * 10;
-#else
         *val = temp;
-#endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
         goto battery_default;
@@ -498,7 +483,7 @@ int get_battery_current(struct charger_manager* manager, int* cur)
 {
     int ret = 0;
     bool gauge_inited;
-    b16_t current = 0;
+    int current = 0;
 
     if (cur == NULL) {
         chargererr("Error:cur is invaild\n");
@@ -517,12 +502,7 @@ int get_battery_current(struct charger_manager* manager, int* cur)
             chargererr("ERROR: ioctl(BATIOC_CURRENT) failed: %d\n", errno);
             goto battery_default;
         }
-
-#ifdef CONFIG_CHARGERD_HWINTF_CONVERSION
-        *cur = b16toi(current);
-#else
         *cur = current;
-#endif
     } else {
         chargererr("gauge has not been initialized successfully\n");
         goto battery_default;
