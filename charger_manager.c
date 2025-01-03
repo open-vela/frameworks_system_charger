@@ -687,7 +687,11 @@ static void charger_event_engine_start(void)
     }
 }
 
-static bool charger_check_cycle_valid(int cycle, struct charger_plot *plot)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+bool charger_check_cycle_valid(int cycle, struct charger_plot *plot)
 {
   if (cycle < 0 || (plot->cycle_min == 0 && plot->cycle_max == 0))
       return true;
@@ -697,10 +701,6 @@ static bool charger_check_cycle_valid(int cycle, struct charger_plot *plot)
 
   return false;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 bool is_adapter_exist(void)
 {

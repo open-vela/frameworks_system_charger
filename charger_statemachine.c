@@ -366,7 +366,7 @@ static int charger_chg_proc(struct charger_manager* data)
         goto fault;
     }
 
-    get_battery_cycle_count(data, &cycle);
+    get_battery_cycle_count(data, &cycle, false);
 
     pa = check_charger_plot(temp, vol, current, data->protocol, cycle);
     if (NULL == pa) {
@@ -413,9 +413,41 @@ static int charger_state_chg(struct charger_manager* data, charger_msg_t* pevent
     return CHARGER_OK;
 }
 
+static int charger_cycle_level_update(struct charger_manager* data)
+{
+    struct charger_plot *plot;
+    int cycle;
+    int i;
+
+    if (get_battery_cycle_count(data, &cycle, true) < 0) {
+        return -1;
+    }
+
+    for (i = 0; i < data->desc.plots; i++) {
+        plot = &data->desc.plot[i];
+        if (plot->mask & (1 << data->protocol)) {
+            if (data->curr_cycle < plot->cycle_min && cycle == plot->cycle_min) {
+                // update model parameters
+                notify_battery_cycle_changed(data);
+                break;
+            }
+        }
+    }
+
+    data->curr_cycle = cycle;
+    return 0;
+}
+
 static int charger_state_full(struct charger_manager* data, charger_msg_t* pevent)
 {
     int ret = 0;
+    int cycle = 0;
+
+    /* notify gauge driver via get cycle when charger full */
+    if ((get_battery_cycle_count(data, &cycle, false) == 0) &&
+        (data->curr_cycle < cycle)) {
+        charger_cycle_level_update(data);
+    }
 
     if (NULL == pevent) {
         if (is_adapter_exist()) {
