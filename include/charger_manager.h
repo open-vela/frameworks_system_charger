@@ -165,6 +165,7 @@ struct charger_manager {
     int curr_limit_level;
     int protocol;
     uint32_t print_cycle;
+    int curr_cycle;
 };
 
 /****************************************************************************
@@ -173,6 +174,7 @@ struct charger_manager {
 
 bool is_adapter_exist(void);
 bool is_supply_exist(void);
+bool charger_check_cycle_valid(int cycle, struct charger_plot *plot);
 struct charger_plot_parameter*
 check_charger_plot(int temp, int vol, int current, int type, int cycle);
 int update_battery_temperature(int temp);

@@ -669,18 +669,47 @@ int set_battery_charge_state(struct charger_manager* manager, unsigned int state
  *    Zero on success or a negated errno value on failure.
  ****************************************************************************/
 
-int get_battery_cycle_count(struct charger_manager* manager, int *count)
+int get_battery_cycle_count(struct charger_manager* manager, int *count, bool full)
 {
     struct batio_operate_msg_s msg;
     int ret;
 
     msg.operate_type = BATIO_OPRTN_CYCLE_COUNT;
+    msg.u8[0] = full;
 
     ret = ioctl(manager->gauge_fd, BATIOC_OPERATE, (unsigned long)((uintptr_t)&msg));
     if (ret < 0) {
         ret = -errno;
     } else {
         *count = msg.u32;
+    }
+
+    return ret;
+}
+
+/****************************************************************************
+ * Name: notify_battery_cycle_changed
+ *
+ * Description:
+ *   notify battery cycle count level changed.
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int notify_battery_cycle_changed(struct charger_manager* manager)
+{
+    struct batio_operate_msg_s msg;
+    int ret;
+
+    msg.operate_type = BATIO_OPRTN_CYCLE_LEVEL;
+
+    ret = ioctl(manager->gauge_fd, BATIOC_OPERATE, (unsigned long)((uintptr_t)&msg));
+    if (ret < 0) {
+        ret = -errno;
     }
 
     return ret;

@@ -44,7 +44,8 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage);
 int get_battery_capacity(struct charger_manager* manager, int* capacity);
 int get_battery_temp(struct charger_manager* manager, int* val);
 int get_battery_current(struct charger_manager* manager, int* cur);
-int get_battery_cycle_count(struct charger_manager* manager, int *count);
+int get_battery_cycle_count(struct charger_manager* manager, int *count, bool full);
+int notify_battery_cycle_changed(struct charger_manager* manager);
 int get_battery_status(struct charger_manager* manager, enum battery_status_e* state);
 int set_battery_vbus_state(struct charger_manager* manager, bool enable);
 #ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
