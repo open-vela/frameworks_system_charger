@@ -300,10 +300,11 @@ static int charger_chg_proc_plot(struct charger_manager* data, struct charger_pl
 
 static void charger_print_battery_info(struct charger_manager* data)
 {
-    int temperature;
-    int capacity;
-    int voltage;
-    int current;
+    int temperature = -1;
+    int capacity = -1;
+    int voltage = -1;
+    int current = -1;
+    int cycle_count = -1;
 
     if (++data->print_cycle % CHARGER_PRINT_PERIOD != 0)
         return;
@@ -322,8 +323,14 @@ static void charger_print_battery_info(struct charger_manager* data)
         chargererr("can not get battery voltage\n");
     }
 
-    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d\n",
-                temperature, capacity, voltage, current);
+    if (data->desc.plot[0].cycle_max != 0) {
+        if (get_battery_cycle_count(data, &cycle_count, false) < 0) {
+            chargererr("can not get battery cycle count\n");
+        }
+    }
+
+    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d; cycle_count:%d\n",
+                temperature, capacity, voltage, current, cycle_count);
 }
 
 static int charger_chg_proc(struct charger_manager* data)
