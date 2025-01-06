@@ -732,7 +732,6 @@ int check_current_limit_level(int current)
     return current;
 }
 
-
 struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current, int type, int cycle)
 {
     static struct charger_plot_parameter* last_pa = NULL;

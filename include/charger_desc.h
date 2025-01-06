@@ -62,6 +62,7 @@ struct charger_plot {
     unsigned int mask;
     int cycle_min;
     int cycle_max;
+    int cutoff_vol;
 };
 
 struct range_data {

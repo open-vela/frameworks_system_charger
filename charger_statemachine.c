@@ -427,6 +427,10 @@ static int charger_cycle_level_update(struct charger_manager* data)
         plot = &data->desc.plot[i];
         if (plot->mask & (1 << data->protocol)) {
             if (data->curr_cycle < plot->cycle_min && cycle == plot->cycle_min) {
+                if (set_charger_voltage(data, 0, plot->cutoff_vol) < 0) {
+                    chargererr("update charger cutoff vol %d failed\n", plot->cutoff_vol);
+                    return -1;
+                }
                 // update model parameters
                 notify_battery_cycle_changed(data);
                 break;
