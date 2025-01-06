@@ -313,6 +313,10 @@ static int parse_charger_desc_config(struct charger_desc* desc)
                     if (tmp_pointer) {
                         desc->plot[desc->plots].cycle_max = tmp_pointer->valueint;
                     }
+                    tmp_pointer = cJSON_GetObjectItem(charger_plot_table_index, "cutoff_vol");
+                    if (tmp_pointer) {
+                        desc->plot[desc->plots].cutoff_vol = tmp_pointer->valueint;
+                    }
                     desc->plots++;
                 } else {
                     chargererr("The charging curve table named %s was not found.\n", name_ptr->valuestring);
