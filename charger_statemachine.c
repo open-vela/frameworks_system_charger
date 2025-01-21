@@ -266,6 +266,34 @@ static int charger_chg_proc_plot(struct charger_manager* data, struct charger_pl
     return CHARGER_OK;
 }
 
+static void charger_print_battery_info(struct charger_manager* data)
+{
+    int temperature;
+    int capacity;
+    int voltage;
+    int current;
+
+    if (++data->print_cycle % CHARGER_PRINT_PERIOD != 0)
+        return;
+    data->print_cycle = 0;
+
+    if (get_battery_temp(data, &temperature) < 0) {
+        chargererr("can not get battery temperature\n");
+    }
+    if (get_battery_capacity(data, &capacity) < 0) {
+        chargererr("can not get battery capacity\n");
+    }
+    if (get_battery_current(data, &current) < 0) {
+        chargererr("can not get battery current\n");
+    }
+    if (get_battery_voltage(data, &voltage) < 0) {
+        chargererr("can not get battery voltage\n");
+    }
+
+    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d\n",
+                temperature, capacity, voltage, current);
+}
+
 static int charger_chg_proc(struct charger_manager* data)
 {
     int temp = 0;
@@ -313,6 +341,8 @@ static int charger_chg_proc(struct charger_manager* data)
         chargererr("charger chg proc plot failed\n");
         goto fault;
     }
+
+    charger_print_battery_info(data);
     return CHARGER_OK;
 fault:
     return charger_chg_proc_fault(data);
