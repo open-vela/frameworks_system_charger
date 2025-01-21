@@ -58,6 +58,7 @@
 #define MQ_MSG_NAME "charger_events"
 #define MQ_MSG_LOAD_MAX (10)
 
+#define CHARGER_PRINT_PERIOD 10
 #define CHARGER_DEBUG_LOG_EN 0
 
 #if (CHARGER_DEBUG_LOG_EN == 1)
@@ -159,6 +160,7 @@ struct charger_manager {
     uint64_t fault_timer_cnt;
     int curr_charger;
     int protocol;
+    uint32_t print_cycle;
 };
 
 /****************************************************************************
