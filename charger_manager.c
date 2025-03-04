@@ -480,6 +480,7 @@ static void charger_dev_close(int fd)
 
 static int charger_dev_init(void)
 {
+    bool present = false;
     int fd;
     const char* dev;
     int i;
@@ -515,6 +516,15 @@ static int charger_dev_init(void)
             g_charger_manager.charger_fd[i] = fd;
         }
     }
+
+    /* check battery online */
+
+    get_battery_present(&g_charger_manager, &present);
+    if (!present) {
+        chargererr("battery is not present, disable charged manager\n");
+        goto fail;
+    }
+
     return CHARGER_OK;
 fail:
     charger_dev_unit();

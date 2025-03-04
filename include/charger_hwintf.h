@@ -39,6 +39,7 @@ int set_charger_voltage(struct charger_manager* manager, int seq, int vol);
 int set_charger_current(struct charger_manager* manager, int seq, int current);
 int get_charger_state(struct charger_manager* manager, int seq, unsigned int* state);
 int get_adapter_type_by_charger(struct charger_manager* manager, int* type);
+int get_battery_present(struct charger_manager* manager, bool* present);
 int get_battery_voltage(struct charger_manager* manager, int* voltage);
 int get_battery_capacity(struct charger_manager* manager, int* capacity);
 int get_battery_temp(struct charger_manager* manager, int* val);
