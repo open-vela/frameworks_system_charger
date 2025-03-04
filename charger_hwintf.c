@@ -316,6 +316,40 @@ int get_adapter_type_by_charger(struct charger_manager* manager, int* type)
 }
 
 /****************************************************************************
+ * Name: get_battery_present
+ *
+ * Description:
+ *   get the battery present
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   present - the pointer to save battery online state
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int get_battery_present(struct charger_manager* manager, bool* present)
+{
+    bool gauge_inited;
+    int ret;
+
+    if (present == NULL) {
+        chargererr("Error: battery present is invaild\n");
+        return CHARGER_FAILED;
+    }
+
+    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    if (ret < 0) {
+        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
+        return CHARGER_FAILED;
+    }
+    *present = gauge_inited;
+
+    return CHARGER_OK;
+}
+
+/****************************************************************************
  * Name: get_battery_voltage
  *
  * Description:
@@ -340,9 +374,8 @@ int get_battery_voltage(struct charger_manager* manager, int* voltage)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    ret = get_battery_present(manager, &gauge_inited);
     if (ret < 0) {
-        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
@@ -390,9 +423,8 @@ int get_battery_capacity(struct charger_manager* manager, int* capacity)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    ret = get_battery_present(manager, &gauge_inited);
     if (ret < 0) {
-        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
@@ -440,9 +472,8 @@ int get_battery_temp(struct charger_manager* manager, int* val)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    ret = get_battery_present(manager, &gauge_inited);
     if (ret < 0) {
-        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
@@ -490,9 +521,8 @@ int get_battery_current(struct charger_manager* manager, int* cur)
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    ret = get_battery_present(manager, &gauge_inited);
     if (ret < 0) {
-        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         goto battery_default;
     }
 
@@ -539,9 +569,8 @@ int get_battery_status(struct charger_manager* manager, enum battery_status_e* s
         return CHARGER_FAILED;
     }
 
-    ret = ioctl(manager->gauge_fd, BATIOC_ONLINE, (unsigned long)((uintptr_t)(&gauge_inited)));
+    ret = get_battery_present(manager, &gauge_inited);
     if (ret < 0) {
-        chargererr("Error: ioctl(BATIOC_ONLINE) failed: %d\n", errno);
         return CHARGER_FAILED;
     }
 
