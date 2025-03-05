@@ -166,6 +166,7 @@ struct charger_manager {
     int protocol;
     uint32_t print_cycle;
     int curr_cycle;
+    uint32_t last_state;
 };
 
 /****************************************************************************

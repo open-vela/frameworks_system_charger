@@ -634,15 +634,14 @@ int set_battery_vbus_state(struct charger_manager* manager, bool enable)
 #ifdef CONFIG_CHARGERD_SYNC_CHARGE_STATE
 int set_battery_charge_state(struct charger_manager* manager, unsigned int state)
 {
-    static unsigned int last_state = UINT_MAX;
     struct batio_operate_msg_s msg;
     int ret;
 
-    if (state == last_state) {
+    if (state == manager->last_state) {
         return 0;
     }
 
-    last_state = state;
+    manager->last_state = state;
     msg.operate_type = BATIO_OPRTN_CHARGER_STATE;
     msg.u32 = state;
 

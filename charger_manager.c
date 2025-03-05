@@ -629,6 +629,7 @@ static int charger_manager_init(void)
         chargererr("charger_event_engine_init failed\n");
         goto algo_fail;
     }
+    g_charger_manager.last_state = UINT_MAX;
     g_charger_manager.currstate = CHARGER_STATE_INIT;
     g_charger_manager.nextstate = CHARGER_STATE_INIT;
     init_state_func_tables(&g_charger_manager);
