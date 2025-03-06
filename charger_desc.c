@@ -18,6 +18,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <kvdb.h>
 #include "charger_desc.h"
 #include "charger_manager.h"
 
@@ -38,12 +39,22 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     char* data;
     cJSON *root, *tmp_pointer, *battery_default_param, *charging_fault_arry, *charger_list;
     cJSON* temp_term_volt_table;
+    char file_path[PATH_MAX];
+    int ret;
 
-    FILE* file = fopen(CONFIG_CHARGER_CONFIGURATION_FILE_PATH, "r");
-    if (!file) {
-        chargererr("Failed to open file %s\n", CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
+    ret = property_get("charger_json_file_path", file_path,
+                       CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
+    if (ret < 0) {
+        chargererr("property get fail, memory error\n");
         return CHARGER_FAILED;
     }
+
+    FILE* file = fopen(file_path, "r");
+    if (!file) {
+        chargererr("Failed to open file %s\n", file_path);
+        return CHARGER_FAILED;
+    }
+    chargerinfo("open charger json file %s\n", file_path);
 
     fseek(file, 0, SEEK_END);
     length = ftell(file);
