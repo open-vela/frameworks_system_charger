@@ -42,7 +42,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     char file_path[PATH_MAX];
     int ret;
 
-    ret = property_get("charger_json_file_path", file_path,
+    ret = property_get("perist.charger.config_path", file_path,
                        CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
     if (ret < 0) {
         chargererr("property get fail, memory error\n");
