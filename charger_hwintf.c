@@ -151,6 +151,38 @@ int get_supply_voltage(struct charger_manager* manager, int* vol)
 }
 
 /****************************************************************************
+ * Name: enable_charger_hiz
+ *
+ * Description:
+ *   enable/disable the charger hiz mode
+ *
+ * Input Parameters:
+ *   manager - the struct charger_manager instance
+ *   seq - the index of charger
+ *   enable - true:enable  false:disable
+ *
+ * Returned Value:
+ *    Zero on success or a negated errno value on failure.
+ ****************************************************************************/
+
+int enable_charger_hiz(struct charger_manager* manager, int seq, bool enable)
+{
+    struct batio_operate_msg_s msg;
+    int ret;
+
+    msg.operate_type = BATIO_OPRTN_HIZ;
+    msg.u32 = enable ? 1 : 0;
+
+    ret = ioctl(manager->charger_fd[seq], BATIOC_OPERATE,
+                (unsigned long)((uintptr_t)&msg));
+    if (ret < 0) {
+        chargererr("Error: ioctl(BATIOC_OPERATE) failed: %d\n", errno);
+        return CHARGER_FAILED;
+    }
+    return CHARGER_OK;
+}
+
+/****************************************************************************
  * Name: enable_charger
  *
  * Description:
@@ -184,6 +216,15 @@ int enable_charger(struct charger_manager* manager, int seq, bool enable)
                     return CHARGER_FAILED;
                 }
             }
+        }
+    }
+
+    if (manager->desc.scene_mode == SCENE_MODE_DEMO) {
+        ret = enable_charger_hiz(manager, seq, !enable);
+        if (ret < 0) {
+            chargererr("Error: %s charger hiz failed: %d\n",
+                       enable ? "disable" : "enable", errno);
+            return CHARGER_FAILED;
         }
     }
 
