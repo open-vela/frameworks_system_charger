@@ -48,19 +48,10 @@ static int charger_timer_cb(void)
     return 0;
 }
 
-static bool stop_charger_by_capacity(struct charger_manager* manager)
+static bool stop_charger_by_capacity(struct charger_manager* manager, int capacity)
 {
-    int capacity;
-    int ret;
-
     if (manager->desc.startchg_capacity == 0) {
         return false;
-    }
-
-    ret = get_battery_capacity(manager, &capacity);
-    if (ret < 0) {
-        chargererr("can not get battery capacity\n");
-        return true;
     }
 
     if (capacity >= manager->desc.fullbatt_capacity) {
@@ -88,6 +79,10 @@ static bool check_battery_full(struct charger_manager* manager)
     ret |= get_battery_current(manager, &current);
     if (ret < 0) {
         chargererr("can not get battery info , so cutoff\n");
+        return true;
+    }
+
+    if (stop_charger_by_capacity(manager, capacity)) {
         return true;
     }
 
@@ -275,6 +270,18 @@ static int charger_chg_proc_plot(struct charger_manager* data, struct charger_pl
     int ret;
 
     curr_charger = &data->curr_charger;
+    if (check_battery_full(data)) {
+        if (*curr_charger == CHARGER_INDEX_INVAILD) {
+            algo = &data->algos[pa->charger_index];
+            ret = algo->ops->stop(algo);
+            chargerassert_return(ret < 0, "algo %d stop failed\n", algo->index);
+        } else {
+            charger_chg_proc_algostop(data);
+        }
+        data->nextstate = CHARGER_STATE_FULL;
+        return CHARGER_OK;
+    }
+
     if (*curr_charger == CHARGER_INDEX_INVAILD) {
         *curr_charger = pa->charger_index;
         algo = &data->algos[*curr_charger];
@@ -341,12 +348,6 @@ static int charger_chg_proc(struct charger_manager* data)
     int cycle = -1;
 
     struct charger_plot_parameter* pa = NULL;
-
-    if (stop_charger_by_capacity(data) || check_battery_full(data)) {
-        charger_chg_proc_algostop(data);
-        data->nextstate = CHARGER_STATE_FULL;
-        return CHARGER_OK;
-    }
 
     if (update_charger_protocol(data) < 0) {
         chargererr("update_charger_protocol failed\n");
