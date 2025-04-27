@@ -75,10 +75,6 @@ static bool check_battery_full(struct charger_manager* manager)
     int ret = 0;
     static int cnt = 0;
 
-    if (manager->desc.scene_mode == SCENE_MODE_NORMAL) {
-        return false;
-    }
-
     ret = get_battery_capacity(manager, &capacity);
     ret |= get_battery_current(manager, &current);
     if (ret < 0) {
@@ -86,8 +82,10 @@ static bool check_battery_full(struct charger_manager* manager)
         return true;
     }
 
-    if (stop_charger_by_capacity(manager, capacity)) {
-        return true;
+    if (manager->desc.scene_mode != SCENE_MODE_NORMAL) {
+        if (stop_charger_by_capacity(manager, capacity)) {
+            return true;
+        }
     }
 
     chargerdebug("capacity :%d current:%d\n", capacity, current);
