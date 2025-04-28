@@ -244,8 +244,7 @@ int main(int argc, char* argv[])
     }
 
 #ifdef CONFIG_PM
-    pm_wakelock_init(&wakelock, "chargerdtool",
-                     PM_IDLE_DOMAIN, PM_NORMAL);
+    pm_wakelock_init(&wakelock, "chargerdtool", PM_IDLE_DOMAIN, PM_NORMAL);
 #endif
     switch (cmd) {
     case BATTERY_TEST_CMD:
@@ -297,7 +296,7 @@ int main(int argc, char* argv[])
             ret = -EINVAL;
         } else {
 #ifdef CONFIG_PM
-            pm_wakelock_staycount(&wakelock);
+            pm_wakelock_stay(&wakelock);
 #endif
             stress_dev_test(fn, argv + optind);
 #ifdef CONFIG_PM
