@@ -225,7 +225,8 @@ static int get_val(struct range_data* range, int rise_hys, int fall_hys,
 
 static int termination_voltage_update(void)
 {
-    int termination_voltage, last_vterm_index;
+    int termination_voltage = 0;
+    int last_vterm_index = 0;
     unsigned int charger_state = BATTERY_UNKNOWN;
     int ret = CHARGER_OK;
 
