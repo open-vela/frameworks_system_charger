@@ -220,10 +220,12 @@ int enable_charger(struct charger_manager* manager, int seq, bool enable)
     }
 
     if (manager->desc.scene_mode == SCENE_MODE_DEMO) {
-        ret = enable_charger_hiz(manager, seq, !enable);
+        if (manager->temp_protect_lock)
+            ret = enable_charger_hiz(manager, seq, 0);
+        else
+            ret = enable_charger_hiz(manager, seq, !enable);
         if (ret < 0) {
-            chargererr("Error: %s charger hiz failed: %d\n",
-                       enable ? "disable" : "enable", errno);
+            chargererr("Error: charger hiz failed: %d\n", errno);
             return CHARGER_FAILED;
         }
     }
