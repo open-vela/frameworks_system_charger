@@ -81,12 +81,14 @@ static bool check_battery_full(struct charger_manager* manager)
         return true;
     }
 
-    if (manager->desc.scene_mode != SCENE_MODE_NORMAL) {
+    /* factroy and demo entry when introducing scene_mode */
+    if (manager->desc.scene_mode > SCENE_MODE_NORMAL) {
         if (stop_charger_by_capacity(manager, capacity)) {
             return true;
         }
     }
 
+    /* compatible older project judge capacity to stop charger */
     chargerdebug("capacity :%d current:%d\n", capacity, current);
     if (capacity >= manager->desc.fullbatt_capacity
         && current >= 0 && current <= manager->desc.fullbatt_current) {
@@ -272,12 +274,15 @@ static int charger_chg_proc_plot(struct charger_manager* data, struct charger_pl
 
     curr_charger = &data->curr_charger;
     if (check_battery_full(data)) {
-        if (*curr_charger == CHARGER_INDEX_INVAILD) {
-            algo = &data->algos[pa->charger_index];
-            ret = algo->ops->stop(algo);
-            chargerassert_return(ret < 0, "algo %d stop failed\n", algo->index);
-        } else {
-            charger_chg_proc_algostop(data);
+        /* chargerd don't need to stop action when check full at normal mode */
+        if (data->desc.scene_mode != SCENE_MODE_NORMAL) {
+            if (*curr_charger == CHARGER_INDEX_INVAILD) {
+                algo = &data->algos[pa->charger_index];
+                ret = algo->ops->stop(algo);
+                chargerassert_return(ret < 0, "algo %d stop failed\n", algo->index);
+            } else {
+                charger_chg_proc_algostop(data);
+            }
         }
         data->nextstate = CHARGER_STATE_FULL;
         return CHARGER_OK;
@@ -337,7 +342,8 @@ static void charger_print_battery_info(struct charger_manager* data)
         }
     }
 
-    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d; cycle_count:%d\n", temperature, capacity, voltage, current, cycle_count);
+    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d; cycle_count:%d\n",
+        temperature, capacity, voltage, current, cycle_count);
 }
 
 static int charger_chg_proc(struct charger_manager* data)
