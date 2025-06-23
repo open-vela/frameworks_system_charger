@@ -35,9 +35,10 @@
 #define MAX_BUF_LEN 32
 #define MAX_RANGES 5
 
-#define SCENE_MODE_NORMAL    0
-#define SCENE_MODE_FACTORY   1
-#define SCENE_MODE_DEMO      2
+#define SCENE_MODE_INVAILD -1
+#define SCENE_MODE_NORMAL 0
+#define SCENE_MODE_FACTORY 1
+#define SCENE_MODE_DEMO 2
 
 /****************************************************************************
  * Public Types

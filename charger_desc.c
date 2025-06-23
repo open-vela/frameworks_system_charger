@@ -19,6 +19,7 @@
  ****************************************************************************/
 
 #include <kvdb.h>
+
 #include "charger_desc.h"
 #include "charger_manager.h"
 
@@ -43,7 +44,7 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     int ret;
 
     ret = property_get("perist.charger.config_path", file_path,
-                       CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
+        CONFIG_CHARGER_CONFIGURATION_FILE_PATH);
     if (ret < 0) {
         chargererr("property get fail, memory error\n");
         return CHARGER_FAILED;
@@ -132,6 +133,8 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     tmp_pointer = cJSON_GetObjectItem(root, "scene_mode");
     if (tmp_pointer) {
         desc->scene_mode = tmp_pointer->valueint;
+    } else {
+        desc->scene_mode = SCENE_MODE_INVAILD;
     }
     tmp_pointer = cJSON_GetObjectItem(root, "startchg_capacity");
     if (tmp_pointer) {
@@ -147,9 +150,10 @@ static int parse_charger_desc_config(struct charger_desc* desc)
     }
     tmp_pointer = cJSON_GetObjectItem(root, "curr_limit_level");
     if (tmp_pointer && cJSON_IsArray(tmp_pointer)) {
-        cJSON *level;
+        cJSON* level;
         int i = 0;
-        cJSON_ArrayForEach(level, tmp_pointer) {
+        cJSON_ArrayForEach(level, tmp_pointer)
+        {
             desc->curr_limit_level[i++] = level->valueint;
         }
     }
