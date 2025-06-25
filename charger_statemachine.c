@@ -60,8 +60,7 @@ static bool stop_charger_by_capacity(struct charger_manager* manager, int capaci
     } else if (capacity < manager->desc.startchg_capacity) {
         manager->capacity_lock = true;
         return false;
-    } else if (manager->curr_charger != CHARGER_INDEX_INVAILD &&
-               manager->capacity_lock) {
+    } else if (manager->curr_charger != CHARGER_INDEX_INVAILD && manager->capacity_lock) {
         return false;
     }
 
@@ -89,8 +88,8 @@ static bool check_battery_full(struct charger_manager* manager)
     }
 
     chargerdebug("capacity :%d current:%d\n", capacity, current);
-    if (capacity >= manager->desc.fullbatt_capacity && manager->desc.fullbatt_capacity != 100 &&
-        current >= 0 && current <= manager->desc.fullbatt_current) {
+    if (capacity >= manager->desc.fullbatt_capacity
+        && current >= 0 && current <= manager->desc.fullbatt_current) {
 
         /*three times of continuous,the condition is satisfying, avoid jitter */
 
@@ -338,8 +337,7 @@ static void charger_print_battery_info(struct charger_manager* data)
         }
     }
 
-    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d; cycle_count:%d\n",
-                temperature, capacity, voltage, current, cycle_count);
+    chargerinfo("temperature:%d; capacity:%d; voltage:%d; current:%d; cycle_count:%d\n", temperature, capacity, voltage, current, cycle_count);
 }
 
 static int charger_chg_proc(struct charger_manager* data)
@@ -425,7 +423,7 @@ static int charger_state_chg(struct charger_manager* data, charger_msg_t* pevent
 
 static int charger_cycle_level_update(struct charger_manager* data)
 {
-    struct charger_plot *plot;
+    struct charger_plot* plot;
     int cycle;
     int i;
 
@@ -458,8 +456,8 @@ static int charger_state_full(struct charger_manager* data, charger_msg_t* peven
     int cycle = 0;
 
     /* notify gauge driver via get cycle when charger full */
-    if ((get_battery_cycle_count(data, &cycle, false) == 0) &&
-        (data->curr_cycle < cycle)) {
+    if ((get_battery_cycle_count(data, &cycle, false) == 0)
+        && (data->curr_cycle < cycle)) {
         charger_cycle_level_update(data);
     }
 
