@@ -18,8 +18,8 @@
  * Included Files
  ****************************************************************************/
 
-#include "charger_statemachine.h"
 #include "charger_hwintf.h"
+#include "charger_statemachine.h"
 
 /****************************************************************************
  * Private Data
@@ -122,6 +122,63 @@ static bool update_fullbatt_timer(struct charger_manager* manager)
     return false;
 }
 
+static int charger_abnormal_publish(struct charger_manager* manager, int state)
+{
+    struct charger_algo* algo = &manager->algos[manager->curr_charger];
+    struct charger_state data;
+
+    data.state = state;
+    data.voltage = algo->sp.supply_vol;
+    data.current = algo->sp.work_current;
+    data.protocol = manager->protocol;
+
+    int ret = orb_publish_auto(ORB_ID(charger_state), NULL, &data, NULL);
+    if (ret < 0) {
+        chargererr("publish charger state failed\n");
+    }
+
+    return ret;
+}
+
+static void check_charger_abnormal_reset(struct charger_manager* manager)
+{
+    int capacity = 0;
+
+    int ret = get_battery_capacity(manager, &capacity);
+    if (ret < 0) {
+        chargererr("can not get battery info , please check!\n");
+    }
+
+    manager->capacity_level = capacity;
+    manager->abnormal_timer_cnt = 0;
+
+    charger_abnormal_publish(manager, 0);
+}
+
+static bool check_charger_abnormal(struct charger_manager* manager)
+{
+    int capacity;
+
+    int ret = get_battery_capacity(manager, &capacity);
+    if (ret < 0) {
+        chargererr("can not get battery info , abnormal happen!\n");
+        return true;
+    }
+
+    if (capacity <= manager->capacity_level) {
+        manager->abnormal_timer_cnt++;
+        /* 10 minutes */
+        if (manager->abnormal_timer_cnt * manager->desc.polling_interval_ms >= 10 * 60 * 1000) {
+            return true;
+        }
+    } else {
+        manager->abnormal_timer_cnt = 0;
+        manager->capacity_level = capacity;
+    }
+
+    return false;
+}
+
 static void clear_fault_timer_cnt(struct charger_manager* manager)
 {
     manager->fault_timer_cnt = 0;
@@ -178,6 +235,7 @@ static int charger_state_init(struct charger_manager* data, charger_msg_t* peven
             chargererr("creat timer failed;\n");
             return CHARGER_FAILED;
         }
+        check_charger_abnormal_reset(data);
         set_battery_vbus_state(data, true);
         charger_wakup();
         ret = update_charger_protocol(data);
@@ -416,6 +474,9 @@ static int charger_state_chg(struct charger_manager* data, charger_msg_t* pevent
         data->nextstate = CHARGER_STATE_INIT;
         break;
     case CHARGER_EVENT_CHG_TIMEOUT:
+        if (check_charger_abnormal(data)) {
+            charger_abnormal_publish(data, 1);
+        }
         return charger_chg_proc(data);
     case CHARGER_EVENT_OVERTEMP:
         charger_chg_proc_algostop(data);

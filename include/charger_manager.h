@@ -38,8 +38,8 @@
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <syslog.h>
-#include <system/state.h>
 #include <system/charger_control.h>
+#include <system/state.h>
 #include <time.h>
 #include <uORB/uORB.h>
 #include <unistd.h>
@@ -161,6 +161,8 @@ struct charger_manager {
     int epollfd;
     uint64_t fullbatt_timer_cnt;
     uint64_t fault_timer_cnt;
+    uint64_t abnormal_timer_cnt;
+    int capacity_level;
     int curr_charger;
     int curr_limit_level;
     int protocol;
@@ -175,7 +177,7 @@ struct charger_manager {
 
 bool is_adapter_exist(void);
 bool is_supply_exist(void);
-bool charger_check_cycle_valid(int cycle, struct charger_plot *plot);
+bool charger_check_cycle_valid(int cycle, struct charger_plot* plot);
 struct charger_plot_parameter*
 check_charger_plot(int temp, int vol, int current, int type, int cycle);
 int update_battery_temperature(int temp);
