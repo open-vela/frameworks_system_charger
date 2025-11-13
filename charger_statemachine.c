@@ -18,8 +18,8 @@
  * Included Files
  ****************************************************************************/
 
-#include "charger_hwintf.h"
 #include "charger_statemachine.h"
+#include "charger_hwintf.h"
 
 /****************************************************************************
  * Private Data

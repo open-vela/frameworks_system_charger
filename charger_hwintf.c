@@ -174,7 +174,7 @@ int enable_charger_hiz(struct charger_manager* manager, int seq, bool enable)
     msg.u32 = enable ? 1 : 0;
 
     ret = ioctl(manager->charger_fd[seq], BATIOC_OPERATE,
-                (unsigned long)((uintptr_t)&msg));
+        (unsigned long)((uintptr_t)&msg));
     if (ret < 0) {
         chargererr("Error: ioctl(BATIOC_OPERATE) failed: %d\n", errno);
         return CHARGER_FAILED;
@@ -711,7 +711,7 @@ int set_battery_charge_state(struct charger_manager* manager, unsigned int state
  *    Zero on success or a negated errno value on failure.
  ****************************************************************************/
 
-int get_battery_cycle_count(struct charger_manager* manager, int *count, bool full)
+int get_battery_cycle_count(struct charger_manager* manager, int* count, bool full)
 {
     struct batio_operate_msg_s msg;
     int ret;

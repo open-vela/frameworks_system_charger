@@ -693,15 +693,15 @@ static void charger_event_engine_start(void)
  * Public Functions
  ****************************************************************************/
 
-bool charger_check_cycle_valid(int cycle, struct charger_plot *plot)
+bool charger_check_cycle_valid(int cycle, struct charger_plot* plot)
 {
-  if (cycle < 0 || (plot->cycle_min == 0 && plot->cycle_max == 0))
-      return true;
+    if (cycle < 0 || (plot->cycle_min == 0 && plot->cycle_max == 0))
+        return true;
 
-  if (cycle >= plot->cycle_min && cycle <= plot->cycle_max)
-      return true;
+    if (cycle >= plot->cycle_min && cycle <= plot->cycle_max)
+        return true;
 
-  return false;
+    return false;
 }
 
 bool is_adapter_exist(void)
@@ -745,7 +745,7 @@ struct charger_plot_parameter* check_charger_plot(int temp, int vol, int current
         g_charger_manager.desc.vol_rise_hys = current * g_charger_manager.desc.back_end_imp / 1000;
     }
     chargerdebug("temp:%d vol:%d type:%d, current:%d, vol_rise_hys:%d, cycle:%d\n",
-                temp, vol, type, current, g_charger_manager.desc.vol_rise_hys, cycle);
+        temp, vol, type, current, g_charger_manager.desc.vol_rise_hys, cycle);
 
     for (i = 0; i < g_charger_manager.desc.plots; i++) {
         plot = &g_charger_manager.desc.plot[i];
