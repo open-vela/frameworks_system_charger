@@ -165,7 +165,7 @@ static bool check_charger_abnormal(struct charger_manager* manager)
         return true;
     }
 
-    if (capacity <= manager->capacity_level) {
+    if (capacity <= manager->capacity_level && capacity < manager->desc.fullbatt_capacity) {
         manager->abnormal_timer_cnt++;
         /* 10 minutes */
         if (manager->abnormal_timer_cnt * manager->desc.polling_interval_ms >= 10 * 60 * 1000) {
